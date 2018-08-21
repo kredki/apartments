@@ -18,7 +18,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "CLIENTS")
-public class ClientEntity implements Serializable {
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class ClientEntity extends TimeEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Version
