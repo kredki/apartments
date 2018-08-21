@@ -1,5 +1,6 @@
 package com.capgemini.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +15,12 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @Entity
 @Table(name = "BUILDINGS")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class BuildingEntity extends TimeEntity implements Serializable {
+public class BuildingEntity extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Version

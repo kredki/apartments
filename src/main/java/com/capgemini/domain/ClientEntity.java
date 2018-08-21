@@ -19,7 +19,7 @@ import java.util.Set;
 @Entity
 @Table(name = "CLIENTS")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class ClientEntity extends TimeEntity implements Serializable {
+public class ClientEntity extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Version

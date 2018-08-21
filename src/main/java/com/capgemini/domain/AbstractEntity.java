@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @MappedSuperclass
 @EntityListeners({CreateTimeListener.class, ModifyTimeListener.class})
-public abstract class TimeEntity implements Serializable {
+public abstract class AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "CREATION_TIME")
