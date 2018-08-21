@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Entity for client.
@@ -19,6 +21,9 @@ import java.io.Serializable;
 public class ClientEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Version
+    public Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,6 +35,9 @@ public class ClientEntity implements Serializable {
     private AddressInTable address;
     @Column(name = "TELEPHONE", nullable = false, length = 50)
     private String telephone;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "owners")
+    Set<ApartmentEntity> apartments = new HashSet<>();
 
     public ClientEntity(Builder builder) {
         this.id = builder.id;
