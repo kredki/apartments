@@ -31,10 +31,19 @@ public class ApartmentServiceImplTest {
 
     @Before
     public void setup() {
-        AddressInTable address = AddressInTable.builder().street("street").postalCode("code").no("no").city("city")
+        AddressInTable address = AddressInTable.builder()
+                .street("street")
+                .postalCode("code")
+                .no("no").city("city")
                 .build();
-        building = BuildingEntity.builder().address(address).apartmentsQty(0).description("dsc").floorQty(5)
-                .isElevatorPresent(false).apartments(new HashSet<>()).build();
+        building = BuildingEntity.builder()
+                .address(address)
+                .apartmentsQty(0)
+                .description("dsc")
+                .floorQty(5)
+                .isElevatorPresent(false)
+                .apartments(new HashSet<>())
+                .build();
         building = buildingRepository.save(building);
     }
 
@@ -43,9 +52,18 @@ public class ApartmentServiceImplTest {
         //given
         Set<ApartmentEntity>apartments = building.getApartments();
         Integer apartmentsQtyBefore = apartments.size();
-        AddressTO address = AddressTO.builder().city("c").no("n").postalCode("pc").street("s").build();
-        ApartmentTO apartmentToAdd = ApartmentTO.builder().address(address).area(new BigDecimal("50")).balconyQty(1)
-                .building(null).floor(0).price(new BigDecimal("120000")).status("free").build();
+        AddressTO address = AddressTO.builder()
+                .city("c").no("n")
+                .postalCode("pc")
+                .street("s")
+                .build();
+        ApartmentTO apartmentToAdd = ApartmentTO.builder()
+                .address(address).area(new BigDecimal("50"))
+                .balconyQty(1)
+                .building(null)
+                .floor(0).price(new BigDecimal("120000"))
+                .status("free")
+                .build();
 
         //when
         ApartmentTO addedApartment = apartmentService.addNewApartment(apartmentToAdd, building.getId());

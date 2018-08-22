@@ -1,7 +1,10 @@
-package com.capgemini.dao;
+package com.capgemini.service.impl;
 
+import com.capgemini.dao.ClientRepository;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ClientEntity;
+import com.capgemini.types.AddressTO;
+import com.capgemini.types.ClientTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +18,25 @@ import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
-public class ClientRepositoryTest {
+public class ClientServiceImplTest {
     @Autowired
     ClientRepository clientRepository;
+    @Autowired
+    ClientServiceImpl clientService;
 
-    private AddressInTable address;
+    private AddressInTable addressInTable;
+    private AddressTO addressTO;
     private ClientEntity client1;
 
     @Before
     public void setup() {
-        address = AddressInTable.builder()
+        addressInTable = AddressInTable.builder()
+                .city("city")
+                .no("no")
+                .postalCode("code")
+                .street("street")
+                .build();
+        addressTO = AddressTO.builder()
                 .city("city")
                 .no("no")
                 .postalCode("code")
@@ -34,7 +46,7 @@ public class ClientRepositoryTest {
                 .telephone("tel1")
                 .lastName("Iksinski")
                 .firstName("Andrzej")
-                .address(address)
+                .address(addressInTable)
                 .build();
         clientRepository.save(client1);
     }
@@ -43,15 +55,15 @@ public class ClientRepositoryTest {
     public void shouldAddClient() {
         //given
         long clientsQty = clientRepository.count();
-        ClientEntity client = ClientEntity.builder()
+        ClientTO client = ClientTO.builder()
                 .telephone("tel")
                 .lastName("Nowak")
                 .firstName("Jan")
-                .address(address)
+                .address(addressTO)
                 .build();
 
         //when
-        ClientEntity savedClient = clientRepository.save(client);
+        ClientTO savedClient = clientService.addNewClient(client);
 
         //then
         assertEquals(clientsQty + 1, clientRepository.count());
@@ -66,27 +78,27 @@ public class ClientRepositoryTest {
         long versionBefore = client1.getVersion();
         long clientsQtyBefore = clientRepository.count();
         long client1Id = client1.getId();
-        ClientEntity clientA = ClientEntity.builder()
+        ClientTO clientA = ClientTO.builder()
                 .id(client1Id)
                 .telephone("tel2")
                 .lastName("Kowalski")
                 .firstName("Stefan")
-                .address(address)
+                .address(addressTO)
                 .version(versionBefore)
                 .build();
-        ClientEntity clientB = ClientEntity.builder()
+        ClientTO clientB = ClientTO.builder()
                 .id(client1Id)
                 .telephone("tel3")
                 .lastName("Kowalski2")
                 .firstName("Stefan2")
-                .address(address)
+                .address(addressTO)
                 .version(versionBefore)
                 .build();
 
         //when
-        clientRepository.save(clientA);
+        clientService.updateClient(clientA);
         try {
-            clientRepository.save(clientB);
+            clientService.updateClient(clientB);
             fail();
         } catch (ObjectOptimisticLockingFailureException e) {
         }
