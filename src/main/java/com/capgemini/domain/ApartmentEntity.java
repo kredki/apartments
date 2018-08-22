@@ -43,14 +43,18 @@ public class ApartmentEntity extends AbstractEntity implements Serializable {
     @Column(name = "PRICE", nullable = false)
     BigDecimal price;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name = "APARTMENTS2CLIENTS",
             joinColumns = {@JoinColumn(name = "APARTMENT_ID", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "CLIENT_ID", nullable = false, updatable = false)}
     )
     Set<ClientEntity> owners = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "BUILDING_ID")
     BuildingEntity building;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinColumn(name = "MAIN_OWNER_ID")
+    private ClientEntity mainOwner;
 }
