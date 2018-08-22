@@ -5,6 +5,7 @@ import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.ClientEntity;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.ClientTO;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Mapper for client
  */
+@Component
 public class ClientMapper {
     @PersistenceContext
     private EntityManager entityManager;

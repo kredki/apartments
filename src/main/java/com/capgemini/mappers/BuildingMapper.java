@@ -5,6 +5,7 @@ import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.BuildingTO;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Mapper for building.
  */
+@Component
 public class BuildingMapper {
     @PersistenceContext
     private EntityManager entityManager;
