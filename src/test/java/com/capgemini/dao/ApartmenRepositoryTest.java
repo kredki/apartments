@@ -28,8 +28,7 @@ public class ApartmenRepositoryTest {
     public void shouldAddBuilding() {
         //given
         long clientsQty = apartmenRepository.count();
-        AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
-                .withStreet("street").build();
+        AddressInTable address = AddressInTable.builder().city("city").no("no").postalCode("code").street("street").build();
         ApartmentEntity apertment = ApartmentEntity.builder().address(address).area(new BigDecimal("5000"))
                 .roomQty(10).price(new BigDecimal("1.29")).status("FREE").floor(0).balconyQty(12).build();
 

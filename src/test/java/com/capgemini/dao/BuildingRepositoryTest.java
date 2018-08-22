@@ -26,8 +26,7 @@ public class BuildingRepositoryTest {
     public void shouldAddBuilding() {
         //given
         long clientsQty = buildingRepository.count();
-        AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
-                .withStreet("street").build();
+        AddressInTable address = AddressInTable.builder().city("city").no("no").postalCode("code").street("street").build();
         BuildingEntity building = BuildingEntity.builder().address(address).apartmentsQty(0).description("description")
                 .floorQty(0).isElevatorPresent(true).build();
 

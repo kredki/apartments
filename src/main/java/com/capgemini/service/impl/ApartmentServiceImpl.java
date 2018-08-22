@@ -2,9 +2,11 @@ package com.capgemini.service.impl;
 
 import com.capgemini.service.ApartmentService;
 import com.capgemini.types.ApartmentTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ApartmentServiceImpl implements ApartmentService {
     @Override
     public ApartmentTO addNewApartment(ApartmentTO apartmentToAdd, Long buildingId) {

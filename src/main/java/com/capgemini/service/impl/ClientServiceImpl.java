@@ -2,9 +2,11 @@ package com.capgemini.service.impl;
 
 import com.capgemini.service.ClientService;
 import com.capgemini.types.ClientTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ClientServiceImpl implements ClientService {
     @Override
     public ClientTO addNewClient(ClientTO clientToAdd) {

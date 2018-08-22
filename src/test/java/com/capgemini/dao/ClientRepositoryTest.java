@@ -26,10 +26,9 @@ public class ClientRepositoryTest {
     public void shouldAddClient() {
         //given
         long clientsQty = clientRepository.count();
-        AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
-                .withStreet("street").build();
-        ClientEntity client = new ClientEntity.Builder().withTelephone("tel").withLastName("Nowak").withFirstName("Jan")
-                .withAddress(address).build();
+        AddressInTable address = AddressInTable.builder().city("city").no("no").postalCode("code").street("street").build();
+        ClientEntity client = ClientEntity.builder().telephone("tel").lastName("Nowak").firstName("Jan").address(address)
+                .build();
 
         //when
         ClientEntity savedClient = clientRepository.save(client);
