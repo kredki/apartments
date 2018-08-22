@@ -1,6 +1,6 @@
 package com.capgemini.domain;
 
-import com.capgemini.Exceptions.IncorrectObjectException;
+import com.capgemini.exceptions.IncorrectObjectException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

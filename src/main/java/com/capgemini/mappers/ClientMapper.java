@@ -1,10 +1,14 @@
 package com.capgemini.mappers;
 
 import com.capgemini.domain.AddressInTable;
+import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.ClientEntity;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.ClientTO;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,20 +16,28 @@ import java.util.stream.Collectors;
  * Mapper for client
  */
 public class ClientMapper {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     /**
      * Map entity to TO.
      * @param client Object to map.
      * @return Mapped object.
      */
-    public static ClientTO toTO(ClientEntity client) {
+    public ClientTO toTO(ClientEntity client) {
         if (client == null) {
             return null;
         }
         AddressTO address = AddressMapper.toTO(client.getAddress());
+        Set<ApartmentEntity> apartments = client.getApartments();
+        Set<Long> apartmentsIds = new HashSet<>();
+        for (ApartmentEntity apartment : apartments) {
+            apartmentsIds.add(apartment.getId());
+        }
 
         return new ClientTO.Builder().withFirstName(client.getFirstName()).withId(client.getId())
                 .withLastName(client.getLastName()).withTelephone(client.getTelephone()).withAddress(address)
-                .build();
+                .withVarsion(client.getVersion()).withApartments(apartmentsIds).build();
     }
 
     /**
@@ -33,15 +45,20 @@ public class ClientMapper {
      * @param client Object to map.
      * @return Mapped object.
      */
-    public static ClientEntity toEntity(ClientTO client) {
+    public ClientEntity toEntity(ClientTO client) {
         if (client == null) {
             return null;
         }
         AddressInTable address = AddressMapper.toInTable(client.getAddress());
+        Set<ApartmentEntity> apartments = new HashSet<>();
+        Set<Long> apartmentsIds = client.getApartments();
+        for (Long id : apartmentsIds) {
+            apartments.add(entityManager.getReference(ApartmentEntity.class, id));
+        }
 
         return new ClientEntity.Builder().withFirstName(client.getFirstName()).withId(client.getId())
                 .withLastName(client.getLastName()).withTelephone(client.getTelephone()).withAddress(address)
-                .build();
+                .withVarsion(client.getVersion()).withApartments(apartments).build();
     }
 
     /**
@@ -49,8 +66,8 @@ public class ClientMapper {
      * @param clients Objects to map.
      * @return Mapped objects.
      */
-    public static Set<ClientTO> map2TOs (Set<ClientEntity> clients) {
-        return clients.stream().map(ClientMapper::toTO).collect(Collectors.toSet());
+    public Set<ClientTO> map2TOs (Set<ClientEntity> clients) {
+        return clients.stream().map(this::toTO).collect(Collectors.toSet());
     }
 
     /**
@@ -58,7 +75,7 @@ public class ClientMapper {
      * @param clients Objects to map.
      * @return Mapped objects.
      */
-    public static Set<ClientEntity> map2Entities (Set<ClientTO> clients) {
-        return clients.stream().map(ClientMapper::toEntity).collect(Collectors.toSet());
+    public Set<ClientEntity> map2Entities (Set<ClientTO> clients) {
+        return clients.stream().map(this::toEntity).collect(Collectors.toSet());
     }
 }

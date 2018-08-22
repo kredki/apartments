@@ -1,10 +1,14 @@
 package com.capgemini.mappers;
 
 import com.capgemini.domain.AddressInTable;
+import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.BuildingTO;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,20 +16,29 @@ import java.util.stream.Collectors;
  * Mapper for building.
  */
 public class BuildingMapper {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     /**
      * Map entity to TO.
      * @param building Object to map.
      * @return Mapped object.
      */
-    public static BuildingTO toTO(BuildingEntity building) {
+    public BuildingTO toTO(BuildingEntity building) {
         if (building == null) {
             return null;
         }
         AddressTO address = AddressMapper.toTO(building.getAddress());
+        Set<Long> apartmentsIds = new HashSet<>();
+        Set<ApartmentEntity> apartments = building.getApartments();
+        for (ApartmentEntity apartment : apartments) {
+            apartmentsIds.add(apartment.getId());
+        }
 
         return BuildingTO.builder().address(address).apartmentsQty(building.getApartmentsQty())
                 .description(building.getDescription()).floorQty(building.getFloorQty()).id(building.getId())
-                .isElevatorPresent(building.getIsElevatorPresent()).build();
+                .isElevatorPresent(building.getIsElevatorPresent()).version(building.getVersion())
+                .apartments(apartmentsIds).build();
     }
 
     /**
@@ -33,15 +46,21 @@ public class BuildingMapper {
      * @param building Object to map.
      * @return Mapped object.
      */
-    public static BuildingEntity toEntity(BuildingTO building) {
+    public BuildingEntity toEntity(BuildingTO building) {
         if (building == null) {
             return null;
         }
         AddressInTable address = AddressMapper.toInTable(building.getAddress());
+        Set<Long> apartmentsIds = building.getApartments();
+        Set<ApartmentEntity> apartments = new HashSet<>();
+        for (Long id : apartmentsIds) {
+            apartments.add(entityManager.getReference(ApartmentEntity.class, id));
+        }
 
         return BuildingEntity.builder().address(address).apartmentsQty(building.getApartmentsQty())
                 .description(building.getDescription()).floorQty(building.getFloorQty()).id(building.getId())
-                .isElevatorPresent(building.getIsElevatorPresent()).build();
+                .isElevatorPresent(building.getIsElevatorPresent()).version(building.getVersion()).apartments(apartments)
+                .build();
     }
 
     /**
@@ -49,8 +68,8 @@ public class BuildingMapper {
      * @param buildings Objects to map.
      * @return Mapped objects.
      */
-    public static Set<BuildingTO> map2TOs (Set<BuildingEntity> buildings) {
-        return buildings.stream().map(BuildingMapper::toTO).collect(Collectors.toSet());
+    public Set<BuildingTO> map2TOs (Set<BuildingEntity> buildings) {
+        return buildings.stream().map(this::toTO).collect(Collectors.toSet());
     }
 
     /**
@@ -58,7 +77,7 @@ public class BuildingMapper {
      * @param buildings Objects to map.
      * @return Mapped objects.
      */
-    public static Set<BuildingEntity> map2Entities (Set<BuildingTO> buildings) {
-        return buildings.stream().map(BuildingMapper::toEntity).collect(Collectors.toSet());
+    public Set<BuildingEntity> map2Entities (Set<BuildingTO> buildings) {
+        return buildings.stream().map(this::toEntity).collect(Collectors.toSet());
     }
 }

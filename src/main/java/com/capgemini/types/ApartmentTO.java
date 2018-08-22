@@ -12,14 +12,15 @@ import java.util.Set;
 @Setter
 @Builder
 public class ApartmentTO {
-    Long id;
-    BigDecimal area;
-    Integer roomQty;
-    Integer balconyQty;
-    Integer floor;
-    AddressTO address;
-    String status;
-    BigDecimal price;
-    Set<Long> owners = new HashSet<>();
-    Long building;
+    private Long version;
+    private Long id;
+    private BigDecimal area;
+    private Integer roomQty;
+    private Integer balconyQty;
+    private Integer floor;
+    private AddressTO address;
+    private String status;
+    private BigDecimal price;
+    private Set<Long> owners = new HashSet<>();
+    private Long building;
 }

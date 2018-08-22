@@ -7,17 +7,22 @@ import com.capgemini.domain.ClientEntity;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.ApartmentTO;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ApartmentMapper {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     /**
      * Map entity to TO.
      * @param apartment Object to map.
      * @return Mapped object.
      */
-    public static ApartmentTO toTO(ApartmentEntity apartment) {
+    public ApartmentTO toTO(ApartmentEntity apartment) {
         if (apartment == null) {
             return null;
         }
@@ -31,7 +36,7 @@ public class ApartmentMapper {
 
         return ApartmentTO.builder().address(address).area(apartment.getArea()).balconyQty(apartment.getBalconyQty())
                 .building(buildingId).floor(apartment.getFloor()).id(apartment.getId()).owners(ownersIds).price(apartment.getPrice())
-                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).build();
+                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).version(apartment.getVersion()).build();
     }
 
     /**
@@ -39,17 +44,21 @@ public class ApartmentMapper {
      * @param apartment Object to map.
      * @return Mapped object.
      */
-    public static ApartmentEntity toEntity(ApartmentTO apartment) {
+    public ApartmentEntity toEntity(ApartmentTO apartment) {
         if (apartment == null) {
             return null;
         }
         AddressInTable address = AddressMapper.toInTable(apartment.getAddress());
 
-        BuildingEntity building = null;
+        BuildingEntity building = entityManager.getReference(BuildingEntity.class, apartment.getBuilding());
+        Set<Long> ownersIds = apartment.getOwners();
         Set<ClientEntity> owners = new HashSet<>();
+        for (Long id : ownersIds) {
+            owners.add(entityManager.getReference(ClientEntity.class, id));
+        }
         return ApartmentEntity.builder().address(address).area(apartment.getArea()).balconyQty(apartment.getBalconyQty())
                 .building(building).floor(apartment.getFloor()).id(apartment.getId()).owners(owners).price(apartment.getPrice())
-                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).build();
+                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).version(apartment.getVersion()).build();
     }
 
     /**
@@ -57,8 +66,8 @@ public class ApartmentMapper {
      * @param apartments Objects to map.
      * @return Mapped objects.
      */
-    public static Set<ApartmentTO> map2TOs (Set<ApartmentEntity> apartments) {
-        return apartments.stream().map(ApartmentMapper::toTO).collect(Collectors.toSet());
+    public Set<ApartmentTO> map2TOs (Set<ApartmentEntity> apartments) {
+        return apartments.stream().map(this::toTO).collect(Collectors.toSet());
     }
 
     /**
@@ -66,7 +75,7 @@ public class ApartmentMapper {
      * @param apartments Objects to map.
      * @return Mapped objects.
      */
-    public static Set<ApartmentEntity> map2Entities (Set<ApartmentTO> apartments) {
-        return apartments.stream().map(ApartmentMapper::toEntity).collect(Collectors.toSet());
+    public Set<ApartmentEntity> map2Entities (Set<ApartmentTO> apartments) {
+        return apartments.stream().map(this::toEntity).collect(Collectors.toSet());
     }
 }

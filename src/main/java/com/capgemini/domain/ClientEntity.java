@@ -1,6 +1,6 @@
 package com.capgemini.domain;
 
-import com.capgemini.Exceptions.IncorrectObjectException;
+import com.capgemini.exceptions.IncorrectObjectException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,14 +46,22 @@ public class ClientEntity extends AbstractEntity implements Serializable {
         this.lastName = builder.lastName;
         this.address = builder.address;
         this.telephone = builder.telephone;
+        this.apartments = builder.apartments;
     }
 
     public static class Builder {
+        private Long version;
         private Long id;
         private String firstName;
         private String lastName;
         private AddressInTable address;
         private String telephone;
+        Set<ApartmentEntity> apartments = new HashSet<>();
+
+        public Builder withVarsion(Long version) {
+            this.version = version;
+            return this;
+        }
 
         public Builder withId(Long id) {
             this.id = id;
@@ -83,6 +91,11 @@ public class ClientEntity extends AbstractEntity implements Serializable {
         public ClientEntity build() {
             checkBeforeBuild();
             return new ClientEntity(this);
+        }
+
+        public Builder withApartments(Set<ApartmentEntity> apartments) {
+            this.apartments.addAll(apartments);
+            return this;
         }
 
         private void checkBeforeBuild() {

@@ -1,4 +1,4 @@
-package com.capgemini.Exceptions;
+package com.capgemini.exceptions;
 
 /**
  * Exception thrown when incorrect object is created.

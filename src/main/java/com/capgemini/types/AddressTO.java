@@ -1,6 +1,6 @@
 package com.capgemini.types;
 
-import com.capgemini.Exceptions.IncorrectObjectException;
+import com.capgemini.exceptions.IncorrectObjectException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,10 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressTO {
-    String street;
-    String no;
-    String city;
-    String postalCode;
+    private String street;
+    private String no;
+    private String city;
+    private String postalCode;
 
     public AddressTO(Builder builder) {
         this.street = builder.street;
@@ -23,10 +23,10 @@ public class AddressTO {
     }
     
     public static class Builder {
-        String street;
-        String no;
-        String city;
-        String postalCode;
+        private String street;
+        private String no;
+        private String city;
+        private String postalCode;
 
         public Builder withStreet(String street) {
             this.street = street;
