@@ -37,9 +37,9 @@ public class ClientMapper {
             apartmentsIds.add(apartment.getId());
         }
 
-        return new ClientTO.Builder().withFirstName(client.getFirstName()).withId(client.getId())
-                .withLastName(client.getLastName()).withTelephone(client.getTelephone()).withAddress(address)
-                .withVarsion(client.getVersion()).withApartments(apartmentsIds).build();
+        return ClientTO.builder().firstName(client.getFirstName()).id(client.getId()).lastName(client.getLastName())
+                .telephone(client.getTelephone()).address(address).version(client.getVersion()).apartments(apartmentsIds)
+                .build();
     }
 
     /**
@@ -58,9 +58,9 @@ public class ClientMapper {
             apartments.add(entityManager.getReference(ApartmentEntity.class, id));
         }
 
-        return new ClientEntity.Builder().withFirstName(client.getFirstName()).withId(client.getId())
-                .withLastName(client.getLastName()).withTelephone(client.getTelephone()).withAddress(address)
-                .withVarsion(client.getVersion()).withApartments(apartments).build();
+        return ClientEntity.builder().firstName(client.getFirstName()).id(client.getId()).lastName(client.getLastName())
+                .telephone(client.getTelephone()).address(address).version(client.getVersion()).apartments(apartments)
+                .build();
     }
 
     /**

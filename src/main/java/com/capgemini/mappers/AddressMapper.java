@@ -17,8 +17,8 @@ public class AddressMapper {
             return null;
         }
 
-        return new AddressTO.Builder().withCity(address.getCity()).withNo(address.getNo())
-                .withPostalCode(address.getPostalCode()).withStreet(address.getStreet()).build();
+        return AddressTO.builder().city(address.getCity()).no(address.getNo()).postalCode(address.getPostalCode())
+                .street(address.getStreet()).build();
     }
 
     /**
@@ -31,7 +31,7 @@ public class AddressMapper {
             return null;
         }
 
-        return new AddressInTable.Builder().withCity(address.getCity()).withNo(address.getNo())
-                .withPostalCode(address.getPostalCode()).withStreet(address.getStreet()).build();
+        return AddressInTable.builder().city(address.getCity()).no(address.getNo()).postalCode(address.getPostalCode())
+                .street(address.getStreet()).build();
     }
 }

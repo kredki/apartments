@@ -1,9 +1,6 @@
 package com.capgemini.domain;
 
-import com.capgemini.exceptions.IncorrectObjectException;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,6 +12,8 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "CLIENTS")
@@ -39,69 +38,4 @@ public class ClientEntity extends AbstractEntity implements Serializable {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "owners")
     Set<ApartmentEntity> apartments = new HashSet<>();
-
-    public ClientEntity(Builder builder) {
-        this.id = builder.id;
-        this.firstName = builder.firstName;
-        this.lastName = builder.lastName;
-        this.address = builder.address;
-        this.telephone = builder.telephone;
-        this.apartments = builder.apartments;
-    }
-
-    public static class Builder {
-        private Long version;
-        private Long id;
-        private String firstName;
-        private String lastName;
-        private AddressInTable address;
-        private String telephone;
-        Set<ApartmentEntity> apartments = new HashSet<>();
-
-        public Builder withVarsion(Long version) {
-            this.version = version;
-            return this;
-        }
-
-        public Builder withId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withFirstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public Builder withLastName(String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public Builder withAddress(AddressInTable address) {
-            this.address = address;
-            return this;
-        }
-
-        public Builder withTelephone(String telephone) {
-            this.telephone = telephone;
-            return this;
-        }
-
-        public ClientEntity build() {
-            checkBeforeBuild();
-            return new ClientEntity(this);
-        }
-
-        public Builder withApartments(Set<ApartmentEntity> apartments) {
-            this.apartments.addAll(apartments);
-            return this;
-        }
-
-        private void checkBeforeBuild() {
-            if (firstName == null || lastName == null || address == null || telephone == null) {
-                throw new IncorrectObjectException("Incorrect rental to be created");
-            }
-        }
-    }
 }
