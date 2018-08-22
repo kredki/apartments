@@ -13,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
-public class BuildingDAOTest {
+public class BuildingRepositoryTest {
     @Autowired
-    BuildingDAO buildingDAO;
+    BuildingRepository buildingRepository;
 
     @Before
     public void setup() {
@@ -25,17 +25,17 @@ public class BuildingDAOTest {
     @Test
     public void shouldAddBuilding() {
         //given
-        long clientsQty = buildingDAO.count();
+        long clientsQty = buildingRepository.count();
         AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
                 .withStreet("street").build();
         BuildingEntity building = BuildingEntity.builder().address(address).apartmentsQty(0).description("description")
                 .floorQty(0).isElevatorPresent(true).build();
 
         //when
-        BuildingEntity savedBuilding = buildingDAO.save(building);
+        BuildingEntity savedBuilding = buildingRepository.save(building);
 
         //then
-        assertEquals(clientsQty + 1, buildingDAO.count());
+        assertEquals(clientsQty + 1, buildingRepository.count());
         assertEquals(building.getApartmentsQty(), savedBuilding.getApartmentsQty());
         assertEquals(building.getDescription(), savedBuilding.getDescription());
         assertEquals(building.getFloorQty(), savedBuilding.getApartmentsQty());

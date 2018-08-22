@@ -13,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
-public class ClientDaoTest {
+public class ClientRepositoryTest {
     @Autowired
-    ClientDao clientDao;
+    ClientRepository clientRepository;
 
     @Before
     public void setup() {
@@ -25,17 +25,17 @@ public class ClientDaoTest {
     @Test
     public void shouldAddClient() {
         //given
-        long clientsQty = clientDao.count();
+        long clientsQty = clientRepository.count();
         AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
                 .withStreet("street").build();
         ClientEntity client = new ClientEntity.Builder().withTelephone("tel").withLastName("Nowak").withFirstName("Jan")
                 .withAddress(address).build();
 
         //when
-        ClientEntity savedClient = clientDao.save(client);
+        ClientEntity savedClient = clientRepository.save(client);
 
         //then
-        assertEquals(clientsQty + 1, clientDao.count());
+        assertEquals(clientsQty + 1, clientRepository.count());
         assertEquals(client.getFirstName(), savedClient.getFirstName());
         assertEquals(client.getLastName(), savedClient.getLastName());
         assertEquals(client.getTelephone(), savedClient.getTelephone());
