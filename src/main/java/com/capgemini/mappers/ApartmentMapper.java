@@ -22,8 +22,12 @@ public class ApartmentMapper {
             return null;
         }
         AddressTO address = AddressMapper.toTO(apartment.getAddress());
-        Long buildingId = 0L;
+        Long buildingId = apartment.getBuilding().getId();
         Set<Long> ownersIds = new HashSet<>();
+        Set<ClientEntity> owners = apartment.getOwners();
+        for(ClientEntity owner : owners) {
+            ownersIds.add(owner.getId());
+        }
 
         return ApartmentTO.builder().address(address).area(apartment.getArea()).balconyQty(apartment.getBalconyQty())
                 .building(buildingId).floor(apartment.getFloor()).id(apartment.getId()).owners(ownersIds).price(apartment.getPrice())

@@ -1,9 +1,6 @@
 package com.capgemini.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,6 +14,7 @@ import java.util.Set;
 @Setter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "BUILDINGS")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
