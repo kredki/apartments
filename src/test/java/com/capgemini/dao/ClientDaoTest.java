@@ -26,7 +26,7 @@ public class ClientDaoTest {
     public void shouldAddClient() {
         //given
         long clientsQty = clientDao.count();
-        AddressInTable address =new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
+        AddressInTable address = new AddressInTable.Builder().withCity("city").withNo("no").withPostalCode("code")
                 .withStreet("street").build();
         ClientEntity client = new ClientEntity.Builder().withTelephone("tel").withLastName("Nowak").withFirstName("Jan")
                 .withAddress(address).build();
