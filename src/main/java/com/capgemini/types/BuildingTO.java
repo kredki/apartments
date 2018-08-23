@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -19,4 +20,8 @@ public class BuildingTO {
     private Boolean isElevatorPresent;
     private Integer apartmentsQty;
     Set<Long> apartments = new HashSet<>();
+
+    public Set<Long> getApartments() {
+        return Objects.isNull(apartments) ? new HashSet<>() : apartments;
+    }
 }

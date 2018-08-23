@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -57,4 +58,8 @@ public class ApartmentEntity extends AbstractEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "MAIN_OWNER_ID")
     private ClientEntity mainOwner;
+
+    public Set<ClientEntity> getOwners() {
+        return Objects.isNull(owners) ? new HashSet<>() : owners;
+    }
 }

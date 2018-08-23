@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,5 +80,23 @@ public class ClientMapper {
      */
     public Set<ClientEntity> map2Entities (Set<ClientTO> clients) {
         return clients.stream().map(this::toEntity).collect(Collectors.toSet());
+    }
+
+    /**
+     * Map set of entities to set of TOs.
+     * @param clients Objects to map.
+     * @return Mapped objects.
+     */
+    public List<ClientTO> map2TOs (List<ClientEntity> clients) {
+        return clients.stream().map(this::toTO).collect(Collectors.toList());
+    }
+
+    /**
+     * Map set of TOs to set of entities.
+     * @param clients Objects to map.
+     * @return Mapped objects.
+     */
+    public List<ClientEntity> map2Entities (List<ClientTO> clients) {
+        return clients.stream().map(this::toEntity).collect(Collectors.toList());
     }
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,4 +41,8 @@ public class BuildingEntity extends AbstractEntity implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<ApartmentEntity> apartments = new HashSet<>();
+
+    public Set<ApartmentEntity> getApartments() {
+        return Objects.isNull(apartments) ? new HashSet<>() : apartments;
+    }
 }

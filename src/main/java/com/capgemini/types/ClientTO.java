@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -20,5 +21,9 @@ public class ClientTO {
     private String lastName;
     private AddressTO address;
     private String telephone;
-    Set<Long> apartments = new HashSet<>();
+    Set<Long> apartments;
+
+    public Set<Long> getApartments() {
+        return Objects.isNull(apartments) ? new HashSet<>() : apartments;
+    }
 }

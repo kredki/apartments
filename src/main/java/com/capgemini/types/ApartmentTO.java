@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -23,4 +24,8 @@ public class ApartmentTO {
     private BigDecimal price;
     private Set<Long> owners = new HashSet<>();
     private Long building;
+
+    public Set<Long> getOwners() {
+        return Objects.isNull(owners) ? new HashSet<>() : owners;
+    }
 }

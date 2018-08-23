@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -38,4 +39,8 @@ public class ClientEntity extends AbstractEntity implements Serializable {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "owners")
     Set<ApartmentEntity> apartments = new HashSet<>();
+
+    public Set<ApartmentEntity> getApartments() {
+        return Objects.isNull(apartments) ? new HashSet<>() : apartments;
+    }
 }

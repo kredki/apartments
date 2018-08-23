@@ -11,15 +11,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ClientServiceImplTest {
     @Autowired
     ClientRepository clientRepository;
@@ -132,9 +134,9 @@ public class ClientServiceImplTest {
 
         //then
         assertEquals(clientsQtyBefore - 1, clientRepository.count());
-        List<ClientEntity> clients = clientRepository.findAll();
+        List<ClientEntity> clientsAfter = clientRepository.findAll();
         List<Long> ids = new ArrayList<>();
-        for (ClientEntity clientAfter : clients) {
+        for (ClientEntity clientAfter : clientsAfter) {
             ids.add(clientAfter.getId());
         }
         assertFalse(ids.contains(clientId));
@@ -165,11 +167,6 @@ public class ClientServiceImplTest {
         //given
         Long client1Id = client1.getId();
         long clientsQtyBefore = clientRepository.count();
-        List<ClientEntity> clientsBefore = clientRepository.findAll();
-        List<Long> ids = new ArrayList<>();
-        for (ClientEntity client : clientsBefore) {
-            ids.add(client.getId());
-        }
 
         //when
         ClientTO foundClient = clientService.findById(client1Id);
@@ -178,7 +175,7 @@ public class ClientServiceImplTest {
         assertNotNull(foundClient);
         assertEquals(client1Id, foundClient.getId());
         assertEquals(client1.getFirstName(), foundClient.getFirstName());
-        assertEquals(client1.getTelephone(), foundClient.getLastName());
+        assertEquals(client1.getLastName(), foundClient.getLastName());
         assertEquals(client1.getTelephone(), foundClient.getTelephone());
     }
 }
