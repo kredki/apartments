@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,5 +83,23 @@ public class ApartmentMapper {
      */
     public Set<ApartmentEntity> map2Entities (Set<ApartmentTO> apartments) {
         return apartments.stream().map(this::toEntity).collect(Collectors.toSet());
+    }
+
+    /**
+     * Map set of entities to set of TOs.
+     * @param apartments Objects to map.
+     * @return Mapped objects.
+     */
+    public List<ApartmentTO> map2TOs (List<ApartmentEntity> apartments) {
+        return apartments.stream().map(this::toTO).collect(Collectors.toList());
+    }
+
+    /**
+     * Map set of TOs to set of entities.
+     * @param apartments Objects to map.
+     * @return Mapped objects.
+     */
+    public List<ApartmentEntity> map2Entities (List<ApartmentTO> apartments) {
+        return apartments.stream().map(this::toEntity).collect(Collectors.toList());
     }
 }
