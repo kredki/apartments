@@ -14,10 +14,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Interface for apartment repository.
+ */
 public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
     @PersistenceContext
     EntityManager entityManager;
 
+    /**
+     * Find apartments by main owner.
+     * @param mainOwnerId Client id.
+     * @return Apartments for given main owner.
+     */
     @Override
     public List<ApartmentEntity> findApartmentsByMainOwner(long mainOwnerId) {
         ClientEntity mainOwner = entityManager.getReference(ClientEntity.class, mainOwnerId);
@@ -27,6 +35,15 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
         return query.getResultList();
     }
 
+    /**
+     * Find apartments by search criteria:
+     * -room quantity,
+     * -balcony quantity,
+     * -area.
+     * All criteria can be null.
+     * @param criteria Object containing search criteria.
+     * @return Apartments matched search criteria.
+     */
     @Override
     public List<ApartmentEntity> findApartmentsByCriteria(ApartmentSearchCriteria criteria) {
         List<ApartmentEntity> emptyResult = new ArrayList<>();
@@ -105,5 +122,17 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
             return query.getResultList();
         }
         return emptyResult;
+    }
+
+    /**
+     * Find apartments with elevator in building or on ground floor.
+     * @return Apartments with elevator in building or on ground floor.
+     */
+    @Override
+    public List<ApartmentEntity> findApartmentsForDisabled() {
+        TypedQuery<ApartmentEntity> query = entityManager.createQuery(
+                "select a from ApartmentEntity a where a.building.isElevatorPresent = true or " +
+                        "a.floor = 0", ApartmentEntity.class);
+        return query.getResultList();
     }
 }

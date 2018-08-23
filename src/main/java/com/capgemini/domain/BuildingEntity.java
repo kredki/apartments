@@ -45,4 +45,14 @@ public class BuildingEntity extends AbstractEntity implements Serializable {
     public Set<ApartmentEntity> getApartments() {
         return Objects.isNull(apartments) ? new HashSet<>() : apartments;
     }
+
+    public void setApartments(Set<ApartmentEntity> apartments) {
+        if(this.apartments == null) {
+            this.apartments = new HashSet<>();
+        }
+        if(apartments != null) {
+            this.apartments.addAll(apartments);
+            this.apartmentsQty += apartments.size();
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.capgemini.dao;
 
 import com.capgemini.domain.AddressInTable;
+import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.ClientEntity;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +12,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -20,6 +25,8 @@ import static org.junit.Assert.fail;
 public class ClientRepositoryTest {
     @Autowired
     ClientRepository clientRepository;
+    @Autowired
+    ApartmentRepository apartmentRepository;
 
     private AddressInTable address;
     private ClientEntity client1;
@@ -38,7 +45,77 @@ public class ClientRepositoryTest {
                 .firstName("Andrzej")
                 .address(address)
                 .build();
-        clientRepository.save(client1);
+
+        BigDecimal price1 = new BigDecimal("123000.12");
+        BigDecimal area1 = new BigDecimal("12.12");
+        Set<ApartmentEntity> apartments = new HashSet<>();
+
+        ApartmentEntity apartment1 = ApartmentEntity.builder()
+                .balconyQty(1)
+                .floor(0)
+                .status("sold")
+                .price(price1)
+                .roomQty(3)
+                .area(area1)
+                .address(address)
+                //.owners(Collections.singleton(client1))
+                //.mainOwner(client1)
+                .build();
+        apartments.add(apartment1);
+
+        ApartmentEntity apartment2 = ApartmentEntity.builder()
+                .balconyQty(2)
+                .floor(0)
+                .status("free")
+                .price(price1)
+                .roomQty(2)
+                .area(area1)
+                .address(address)
+                //.owners(Collections.singleton(client1))
+                //.mainOwner(client1)
+                .build();
+
+        ApartmentEntity apartment3 = ApartmentEntity.builder()
+                .balconyQty(2)
+                .floor(0)
+                .status("sold")
+                .price(price1)
+                .roomQty(2)
+                .area(area1)
+                .address(address)
+                //.owners(Collections.singleton(client1))
+                //.mainOwner(client1)
+                .build();
+        apartments.add(apartment2);
+        client1 = clientRepository.save(client1);
+        apartmentRepository.save(apartment1);
+        apartmentRepository.save(apartment2);
+        apartmentRepository.save(apartment3);/*
+
+        apartment1.setMainOwner(client1);
+        apartment2.setMainOwner(client1);
+        apartment3.setMainOwner(client1);
+        apartment1.setOwners(Collections.singleton(client1));
+        apartment2.setOwners(Collections.singleton(client1));
+        apartment3.setOwners(Collections.singleton(client1));*/
+        apartmentRepository.save(apartment1);
+        apartmentRepository.save(apartment2);
+        apartmentRepository.save(apartment3);
+
+        client1.setApartments(apartments);
+        client1 = clientRepository.save(client1);
+    }
+
+    @Test
+    public void shouldFindApartmentsWorthForClient() {
+        //
+        BigDecimal expectedPriceSum = new BigDecimal("246000.24");
+
+        //when
+        BigDecimal priceSum = clientRepository.findApartmentsWorthForClient(client1.getId());
+
+        //then
+        assertEquals(expectedPriceSum, priceSum);
     }
 
     @Test
