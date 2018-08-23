@@ -119,7 +119,6 @@ public class ClientServiceImplTest {
     @Test
     public void shouldRemoveClient() {
         //given
-        long clientsQtyBefore = clientRepository.count();
         ClientEntity client = ClientEntity.builder()
                 .telephone("tel")
                 .lastName("Nowak")
@@ -127,9 +126,11 @@ public class ClientServiceImplTest {
                 .address(addressInTable)
                 .build();
         client = clientRepository.save(client);
+        long clientsQtyBefore = clientRepository.count();
         Long clientId = client.getId();
 
         //when
+        //List<ClientEntity> clientsBefore = clientRepository.findAll();
         clientService.removeClient(clientId);
 
         //then

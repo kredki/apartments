@@ -19,7 +19,7 @@ public class ClientServiceImpl implements ClientService {
     ClientMapper clientMapper;
 
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, noRollbackFor=Exception.class)
+    @Transactional(propagation=Propagation.REQUIRED)
     public ClientTO addNewClient(ClientTO clientToAdd) {
         if(clientToAdd == null) {
             return null;
@@ -28,7 +28,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, noRollbackFor=Exception.class)
+    @Transactional(propagation=Propagation.REQUIRED)
     public ClientTO updateClient(ClientTO clientToUpdate) {
         if(clientToUpdate == null) {
             return null;
@@ -37,19 +37,21 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, noRollbackFor=Exception.class)
+    @Transactional(propagation=Propagation.REQUIRED)
     public void removeClient(Long clientId) {
-        clientRepository.delete(clientId);
+        if (clientId != null) {
+            clientRepository.delete(clientId);
+        }
     }
 
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional(propagation=Propagation.REQUIRED, readOnly=true)
     public List<ClientTO> findAll() {
         return clientMapper.map2TOs(clientRepository.findAll());
     }
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional(propagation= Propagation.REQUIRED, readOnly=true)
     public ClientTO findById(Long id) {
         return clientMapper.toTO(clientRepository.findOne(id));
     }
