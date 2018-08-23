@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Setter
 public class ApartmentSearchCriteria {
     private BigDecimal areaFrom;
-    private BigDecimal areTo;
+    private BigDecimal areaTo;
     private Integer roomQtyFrom;
     private Integer roomQtyTo;
     private Integer balconyQtyFrom;

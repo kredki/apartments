@@ -45,7 +45,7 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
             params.put("areaFrom", areaFrom);
         }
 
-        BigDecimal areaTo = criteria.getAreTo();
+        BigDecimal areaTo = criteria.getAreaTo();
         if (areaTo != null) {
             if (canAddEnd) {
                 queryString.append(" and ");

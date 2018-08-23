@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
@@ -28,6 +29,8 @@ public class ApartmenRepositoryTest {
     @Autowired
     BuildingRepository buildingRepository;
 
+    private ApartmentEntity apartment1;
+    private ApartmentEntity apartment2;
     private ApartmentEntity apartment3;
 
     @Before
@@ -53,7 +56,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         Set<ApartmentEntity> apartments = new HashSet<>();
-        ApartmentEntity apartment1 = ApartmentEntity.builder()
+        apartment1 = ApartmentEntity.builder()
                 .balconyQty(1)
                 .floor(0)
                 .status("sold")
@@ -65,7 +68,7 @@ public class ApartmenRepositoryTest {
                 .build();
         apartments.add(apartment1);
 
-        ApartmentEntity apartment2 = ApartmentEntity.builder()
+        apartment2 = ApartmentEntity.builder()
                 .balconyQty(2)
                 .floor(0)
                 .status("free")
@@ -116,7 +119,7 @@ public class ApartmenRepositoryTest {
         //given
         ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
                 .areaFrom(new BigDecimal("58.00"))
-                .areTo(new BigDecimal("130.00"))
+                .areaTo(new BigDecimal("130.00"))
                 .balconyQtyFrom(2)
                 .balconyQtyTo(3)
                 .roomQtyFrom(1)
@@ -124,7 +127,6 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> x = apartmenRepository.findAll();
         List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
 
         //then
@@ -137,5 +139,138 @@ public class ApartmenRepositoryTest {
         assertEquals(apartment.getArea(), apartment3.getArea());
         assertEquals(apartment.getRoomQty(), apartment3.getRoomQty());
         assertEquals(apartment.getStatus().toUpperCase(), "free".toUpperCase());
+    }
+
+    @Test
+    public void shouldNotFindByCriteria() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldFindByRoomQtyFrom() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .roomQtyFrom(1)
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    public void shouldFindByRoomQtyTo() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .roomQtyTo(10)
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    public void shouldFindByBalconyQtyTo() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .balconyQtyTo(10)
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    public void shouldFindByBalconyQtyFrom() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .balconyQtyFrom(0)
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    public void shouldFindByAreaFrom() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .areaFrom(new BigDecimal("12.12"))
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    public void shouldFindByAreaTo() {
+        //given
+        ApartmentSearchCriteria criteria = ApartmentSearchCriteria.builder()
+                .areaTo(new BigDecimal("130.00"))
+                .build();
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+
+        //then
+        assertEquals(2, result.size());
+        Set<Long> ids = new HashSet<>();
+        for (ApartmentEntity apartment : result) {
+            ids.add(apartment.getId());
+        }
+        assertTrue(ids.contains(apartment2.getId()));
+        assertTrue(ids.contains(apartment3.getId()));
     }
 }
