@@ -25,9 +25,9 @@ import static org.junit.Assert.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ApartmenRepositoryTest {
     @Autowired
-    ApartmentRepository apartmenRepository;
+    private ApartmentRepository apartmenRepository;
     @Autowired
-    BuildingRepository buildingRepository;
+    private BuildingRepository buildingRepository;
 
     private ApartmentEntity apartment1;
     private ApartmentEntity apartment2;

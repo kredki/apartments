@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class BuildingRepositoryImpl implements BuildingRepositoryCustom {
     @PersistenceContext
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     /**
      * Find average price in given building.
@@ -24,10 +24,11 @@ public class BuildingRepositoryImpl implements BuildingRepositoryCustom {
     @Override
     public BigDecimal findAvgPriceForBuilding(Long buildingId) {
         BuildingEntity building = entityManager.getReference(BuildingEntity.class, buildingId);
-        TypedQuery<BigDecimal> query = entityManager.createQuery(
-                "select avg(a.price) from ApartmentEntity a where :building = a.building", BigDecimal.class);
+        TypedQuery<Double> query = entityManager.createQuery(
+                "select avg(a.price) from ApartmentEntity a where :building = a.building", Double.class);
         query.setParameter("building", building);
-        return query.getSingleResult();
+        Double result = query.getSingleResult();
+        return new BigDecimal(result);
     }
 
     /**

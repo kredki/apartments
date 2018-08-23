@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
     @PersistenceContext
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     /**
      * Find apartments by main owner.

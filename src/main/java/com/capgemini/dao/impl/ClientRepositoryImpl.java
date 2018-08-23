@@ -15,7 +15,7 @@ import java.util.List;
 public class ClientRepositoryImpl implements ClientRepositoryCustom {
 
     @PersistenceContext
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     /**
      * Find sum of price of apartments for given client.
@@ -25,10 +25,11 @@ public class ClientRepositoryImpl implements ClientRepositoryCustom {
     @Override
     public BigDecimal findApartmentsWorthForClient(Long clientId) {
         ClientEntity client = entityManager.getReference(ClientEntity.class, clientId);
-        TypedQuery<BigDecimal> query = entityManager.createQuery(
-                "select sum(a.price) from ApartmentEntity a where :client member of a.owners", BigDecimal.class);
+        TypedQuery<Double> query = entityManager.createQuery(
+                "select sum(a.price) from ApartmentEntity a where :client member of a.owners", Double.class);
         query.setParameter("client", client);
-        return query.getSingleResult();
+        Double result = query.getSingleResult();
+        return new BigDecimal(result);
     }
 
     /**
