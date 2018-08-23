@@ -13,8 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
@@ -54,7 +56,7 @@ public class ClientServiceImplTest {
     @Test
     public void shouldAddClient() {
         //given
-        long clientsQty = clientRepository.count();
+        long clientsQtyBefore = clientRepository.count();
         ClientTO client = ClientTO.builder()
                 .telephone("tel")
                 .lastName("Nowak")
@@ -66,7 +68,7 @@ public class ClientServiceImplTest {
         ClientTO savedClient = clientService.addNewClient(client);
 
         //then
-        assertEquals(clientsQty + 1, clientRepository.count());
+        assertEquals(clientsQtyBefore + 1, clientRepository.count());
         assertEquals(client.getFirstName(), savedClient.getFirstName());
         assertEquals(client.getLastName(), savedClient.getLastName());
         assertEquals(client.getTelephone(), savedClient.getTelephone());
@@ -110,5 +112,73 @@ public class ClientServiceImplTest {
         assertEquals(clientA.getTelephone(), savedClient.getTelephone());
         assertEquals(clientA.getFirstName(), savedClient.getFirstName());
         assertEquals(new Long(versionBefore + 1L), savedClient.getVersion());
+    }
+
+    @Test
+    public void shouldRemoveClient() {
+        //given
+        long clientsQtyBefore = clientRepository.count();
+        ClientEntity client = ClientEntity.builder()
+                .telephone("tel")
+                .lastName("Nowak")
+                .firstName("Jan")
+                .address(addressInTable)
+                .build();
+        client = clientRepository.save(client);
+        Long clientId = client.getId();
+
+        //when
+        clientService.removeClient(clientId);
+
+        //then
+        assertEquals(clientsQtyBefore - 1, clientRepository.count());
+        List<ClientEntity> clients = clientRepository.findAll();
+        List<Long> ids = new ArrayList<>();
+        for (ClientEntity clientAfter : clients) {
+            ids.add(clientAfter.getId());
+        }
+        assertFalse(ids.contains(clientId));
+    }
+
+    @Test
+    public void shouldFindAllClients() {
+        //given
+        long clientsQtyBefore = clientRepository.count();
+        List<ClientEntity> clientsBefore = clientRepository.findAll();
+        List<Long> ids = new ArrayList<>();
+        for (ClientEntity client : clientsBefore) {
+            ids.add(client.getId());
+        }
+
+        //when
+        List<ClientTO> clientsAfter = clientService.findAll();
+
+        //then
+        assertEquals(clientsQtyBefore, clientsAfter.size());
+        for (ClientTO clientAfter : clientsAfter) {
+            assertTrue(ids.contains(clientAfter.getId()));
+        }
+    }
+
+    @Test
+    public void shouldFindById() {
+        //given
+        Long client1Id = client1.getId();
+        long clientsQtyBefore = clientRepository.count();
+        List<ClientEntity> clientsBefore = clientRepository.findAll();
+        List<Long> ids = new ArrayList<>();
+        for (ClientEntity client : clientsBefore) {
+            ids.add(client.getId());
+        }
+
+        //when
+        ClientTO foundClient = clientService.findById(client1Id);
+
+        //then
+        assertNotNull(foundClient);
+        assertEquals(client1Id, foundClient.getId());
+        assertEquals(client1.getFirstName(), foundClient.getFirstName());
+        assertEquals(client1.getTelephone(), foundClient.getLastName());
+        assertEquals(client1.getTelephone(), foundClient.getTelephone());
     }
 }

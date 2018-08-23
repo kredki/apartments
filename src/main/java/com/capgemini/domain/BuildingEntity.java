@@ -38,6 +38,6 @@ public class BuildingEntity extends AbstractEntity implements Serializable {
     @Column(name = "APARTMENT_QUANTITY", nullable = false)
     private Integer apartmentsQty;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "building")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<ApartmentEntity> apartments = new HashSet<>();
 }
