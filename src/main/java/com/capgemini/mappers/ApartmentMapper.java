@@ -33,7 +33,11 @@ public class ApartmentMapper {
             return null;
         }
         AddressTO address = AddressMapper.toTO(apartment.getAddress());
-        Long buildingId = apartment.getBuilding().getId();
+        Long buildingId = null;
+        BuildingEntity building = apartment.getBuilding();
+        if (building != null) {
+            buildingId = building.getId();
+        }
         Set<Long> ownersIds = new HashSet<>();
         Set<ClientEntity> owners = apartment.getOwners();
         for(ClientEntity owner : owners) {

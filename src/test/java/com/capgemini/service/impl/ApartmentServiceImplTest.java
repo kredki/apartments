@@ -5,6 +5,7 @@ import com.capgemini.dao.BuildingRepository;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.testutils.ApartmentGenerator;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.ApartmentTO;
 import org.junit.Before;
@@ -15,9 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
@@ -32,18 +34,27 @@ public class ApartmentServiceImplTest {
     private BuildingRepository buildingRepository;
     @Autowired
     ApartmentRepository apartmentRepository;
+    @Autowired
+    ApartmentGenerator apartmentGenerator;
 
     private BuildingEntity building;
+    private AddressTO addressTO;
+    private AddressInTable addressInTable;
 
     @Before
     public void setup() {
-        AddressInTable address = AddressInTable.builder()
+        addressTO = AddressTO.builder()
+                .street("street")
+                .postalCode("code")
+                .no("no").city("city")
+                .build();
+        addressInTable = AddressInTable.builder()
                 .street("street")
                 .postalCode("code")
                 .no("no").city("city")
                 .build();
         building = BuildingEntity.builder()
-                .address(address)
+                .address(addressInTable)
                 .apartmentsQty(0)
                 .description("dsc")
                 .floorQty(5)
@@ -54,32 +65,69 @@ public class ApartmentServiceImplTest {
     }
 
     @Test
+    @Transactional
+    public void shouldFindById() {
+        //given
+        ApartmentEntity apartment = apartmentGenerator.getFreeApartment();
+        apartment = apartmentRepository.save(apartment);
+
+        //then
+        ApartmentTO foundApartment = apartmentService.findById(apartment.getId());
+
+        //then
+        assertThat(foundApartment).isNotNull();
+        assertThat(foundApartment.getId()).isEqualTo(apartment.getId());
+        assertThat(foundApartment.getArea()).isEqualTo(apartment.getArea());
+        assertThat(foundApartment.getBalconyQty()).isEqualTo(apartment.getBalconyQty());
+        assertThat(foundApartment.getFloor()).isEqualTo(apartment.getFloor());
+        assertThat(foundApartment.getPrice()).isEqualTo(apartment.getPrice());
+        assertThat(foundApartment.getRoomQty()).isEqualTo(apartment.getRoomQty());
+        assertThat(foundApartment.getStatus()).isEqualTo(apartment.getStatus());
+    }
+
+    @Test
+    public void shouldFindAll() {
+        //given
+        long apartmentsQtyBefore = apartmentRepository.count();
+        List<ApartmentEntity> apartmentsBefore = apartmentRepository.findAll();
+        List<Long> idsBefore = apartmentsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
+
+        //when
+        List<ApartmentTO> foundApartments = apartmentService.findAll();
+
+        //then
+        assertEquals(apartmentsQtyBefore, foundApartments.size());
+        List<Long> idsAfter = foundApartments.stream().map(x -> x.getId()).collect(Collectors.toList());
+        for (Long id : idsBefore) {
+            assertTrue(idsAfter.contains(id));
+        }
+
+    }
+
+    @Test
     public void shouldNotAddApartment() {
         //given
-        long countBefore = apartmentRepository.count();
+        long apartmentsQtyBefore = apartmentRepository.count();
 
         //when
         ApartmentTO apartment = apartmentService.addNewApartment(null, building.getId());
 
         //then
         assertThat(apartment).isNull();
-        assertThat(apartmentRepository.count()).isEqualTo(countBefore);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentsQtyBefore);
     }
 
     @Test
     public void shouldNotAddApartment2() {
         //given
-        long countBefore = apartmentRepository.count();
-        AddressTO address = AddressTO.builder()
-                .city("c").no("n")
-                .postalCode("pc")
-                .street("s")
-                .build();
+        long apartmentsQtyBefore = apartmentRepository.count();
         ApartmentTO apartmentToAdd = ApartmentTO.builder()
-                .address(address).area(new BigDecimal("50"))
+                .address(addressTO)
+                .area(new BigDecimal("50"))
                 .balconyQty(1)
-                .building(null)
-                .floor(0).price(new BigDecimal("120000"))
+                .building(building.getId())
+                .floor(0)
+                .price(new BigDecimal("120000"))
                 .status("free")
                 .build();
 
@@ -88,7 +136,115 @@ public class ApartmentServiceImplTest {
 
         //then
         assertThat(apartment).isNull();
-        assertThat(apartmentRepository.count()).isEqualTo(countBefore);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentsQtyBefore);
+    }
+
+    @Test
+    public void shouldNotRemoveApartment() {
+        //given
+        Long apartmentQtyBefore = apartmentRepository.count();
+        List<ApartmentEntity> apartmentsBefore = apartmentRepository.findAll();
+        List<Long> idsBefore = apartmentsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
+        Optional<Long> max = idsBefore.stream().max(Comparator.naturalOrder());
+        Long idNotInDB = 1L;
+        if(max.isPresent()) {
+            idNotInDB = max.get();
+        }
+
+        //when
+        apartmentService.removeApartment(idNotInDB);
+
+        //then
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        List<ApartmentEntity> apartmentsAfter = apartmentRepository.findAll();
+        List<Long> idsAfter = apartmentsAfter.stream().map(x -> x.getId()).collect(Collectors.toList());
+        for (Long id : idsBefore) {
+            assertTrue(idsAfter.contains(id));
+        }
+    }
+
+    @Test
+    @Transactional
+    public void shouldRemoveApartment() {
+        //given
+        ApartmentEntity apartmentBefore = ApartmentEntity.builder()
+                .address(addressInTable)
+                .area(new BigDecimal("50"))
+                .balconyQty(1)
+                .building(building)
+                .floor(0)
+                .roomQty(1)
+                .price(new BigDecimal("120000"))
+                .status("free")
+                .build();
+        apartmentBefore = apartmentRepository.save(apartmentBefore);
+        long apartmentQtyBefore = apartmentRepository.count();
+        List<ApartmentEntity> apartmentsBefore = apartmentRepository.findAll();
+        List<Long> idsBefore = apartmentsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
+
+        //when
+        apartmentService.removeApartment(apartmentBefore.getId());
+
+        //then
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore - 1);
+        List<ApartmentEntity> apartmentsAfter = apartmentRepository.findAll();
+        List<Long> idsAfter = apartmentsAfter.stream().map(x -> x.getId()).collect(Collectors.toList());
+        for (Long id : idsBefore) {
+            assertTrue(idsAfter.contains(id));
+        }
+    }
+
+    @Test
+    @Transactional
+    public void shouldUpdateApartment() {
+        //given
+        ApartmentEntity apartmentBefore = ApartmentEntity.builder()
+                .address(addressInTable)
+                .area(new BigDecimal("50"))
+                .balconyQty(1)
+                .building(building)
+                .floor(0)
+                .roomQty(2)
+                .price(new BigDecimal("120000"))
+                .status("free")
+                .build();
+        apartmentBefore = apartmentRepository.save(apartmentBefore);
+        long apartmentQtyBefore = apartmentRepository.count();
+
+        ApartmentTO apartmentToUpdate = ApartmentTO.builder()
+                .id(apartmentBefore.getId())
+                .address(addressTO)
+                .area(new BigDecimal("70"))
+                .balconyQty(12)
+                .building(building.getId())
+                .floor(10)
+                .roomQty(1)
+                .price(new BigDecimal("1200000"))
+                .status("sold")
+                .build();
+
+        //when
+        ApartmentTO result = apartmentService.updateApartment(apartmentToUpdate);
+
+        //then
+        assertThat(result).isNotNull();
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(result.getId()).isEqualTo(apartmentToUpdate.getId());
+        assertThat(result.getArea()).isEqualTo(apartmentToUpdate.getArea());
+        assertThat(result.getBalconyQty()).isEqualTo(apartmentToUpdate.getBalconyQty());
+        assertThat(result.getFloor()).isEqualTo(apartmentToUpdate.getFloor());
+        assertThat(result.getPrice()).isEqualTo(apartmentToUpdate.getPrice());
+        assertThat(result.getRoomQty()).isEqualTo(apartmentToUpdate.getRoomQty());
+        assertThat(result.getStatus()).isEqualTo(apartmentToUpdate.getStatus());
+
+        ApartmentEntity apartmentAfter = apartmentRepository.findOne(apartmentBefore.getId());
+        assertThat(apartmentAfter.getId()).isEqualTo(apartmentToUpdate.getId());
+        assertThat(apartmentAfter.getArea()).isEqualTo(apartmentToUpdate.getArea());
+        assertThat(apartmentAfter.getBalconyQty()).isEqualTo(apartmentToUpdate.getBalconyQty());
+        assertThat(apartmentAfter.getFloor()).isEqualTo(apartmentToUpdate.getFloor());
+        assertThat(apartmentAfter.getPrice()).isEqualTo(apartmentToUpdate.getPrice());
+        assertThat(apartmentAfter.getRoomQty()).isEqualTo(apartmentToUpdate.getRoomQty());
+        assertThat(apartmentAfter.getStatus()).isEqualTo(apartmentToUpdate.getStatus());
     }
 
     @Test
@@ -96,16 +252,14 @@ public class ApartmentServiceImplTest {
         //given
         Set<ApartmentEntity>apartments = building.getApartments();
         Integer apartmentsQtyBefore = apartments.size();
-        AddressTO address = AddressTO.builder()
-                .city("c").no("n")
-                .postalCode("pc")
-                .street("s")
-                .build();
+
         ApartmentTO apartmentToAdd = ApartmentTO.builder()
-                .address(address).area(new BigDecimal("50"))
+                .address(addressTO)
+                .area(new BigDecimal("50"))
                 .balconyQty(1)
-                .building(null)
-                .floor(0).price(new BigDecimal("120000"))
+                .building(building.getId())
+                .floor(0)
+                .price(new BigDecimal("120000"))
                 .status("free")
                 .build();
 

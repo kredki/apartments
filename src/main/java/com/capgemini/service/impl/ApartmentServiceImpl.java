@@ -53,6 +53,9 @@ public class ApartmentServiceImpl implements ApartmentService {
      */
     @Override
     public void removeApartment(Long apartmentId) {
+        if(apartmentRepository.findOne(apartmentId) == null) {
+            return;
+        }
         apartmentRepository.delete(apartmentId);
     }
 
