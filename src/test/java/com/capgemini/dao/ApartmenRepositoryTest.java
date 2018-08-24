@@ -3,6 +3,7 @@ package com.capgemini.dao;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.testutils.ApartmentGenerator;
 import com.capgemini.types.ApartmentSearchCriteria;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,11 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -28,10 +32,13 @@ public class ApartmenRepositoryTest {
     private ApartmentRepository apartmenRepository;
     @Autowired
     private BuildingRepository buildingRepository;
+    @Autowired
+    ApartmentGenerator apartmentGenerator;
 
     private ApartmentEntity apartment1;
     private ApartmentEntity apartment2;
     private ApartmentEntity apartment3;
+    private AddressInTable address;
 
     @Before
     public void setup() {
@@ -40,7 +47,7 @@ public class ApartmenRepositoryTest {
         BigDecimal area1 = new BigDecimal("12.12");
         BigDecimal area2 = new BigDecimal("130.00");
         BigDecimal area3 = new BigDecimal("58.00");
-        AddressInTable address = AddressInTable.builder()
+        address = AddressInTable.builder()
                 .city("city")
                 .no("no")
                 .postalCode("postal code")
@@ -93,6 +100,56 @@ public class ApartmenRepositoryTest {
         apartments.add(apartment3);
         building.setApartments(apartments);
         buildingRepository.save(building);
+    }
+
+    @Test
+    @Transactional
+    public void shouldFindApartmentsForDisabled() {
+        //given
+        BuildingEntity building1 = BuildingEntity.builder()
+                .isElevatorPresent(false)
+                .floorQty(10)
+                .description("description")
+                .apartmentsQty(0)
+                .address(address)
+                .build();
+
+        Set<ApartmentEntity> apartments = new HashSet<>();
+        ApartmentEntity apartment1 = apartmentGenerator.getApartmentWithFloor0();
+        apartments.add(apartment1);
+        ApartmentEntity apartment2 = apartmentGenerator.getApartmentWithFloor1();
+        apartments.add(apartment2);
+
+        building1.setApartments(apartments);
+        buildingRepository.save(building1);
+
+        //get apartments ids for disabled
+        List<Long> apartmentsFodDisabledIds = new ArrayList<>();
+        List<BuildingEntity> buildings = buildingRepository.findAll();
+        for (BuildingEntity building : buildings) {
+            Set<ApartmentEntity> apartmentsFromBuilding = building.getApartments();
+            Boolean isElevatorPresent = building.getIsElevatorPresent();
+            for (ApartmentEntity apartment : apartmentsFromBuilding) {
+                if(isElevatorPresent || apartment.getFloor() == 0) {
+                    apartmentsFodDisabledIds.add(apartment.getId());
+                }
+            }
+        }
+
+        //when
+        List<ApartmentEntity> apartmentsForDisabledResult = apartmenRepository.findApartmentsForDisabled();
+
+        //then
+        assertThat(apartmentsForDisabledResult).isNotNull().isNotEmpty();
+        assertThat(apartmentsForDisabledResult.size()).isEqualTo(apartmentsFodDisabledIds.size());
+        List<Long> apartmentForDisabledIdsResult = new ArrayList<>();
+        for (ApartmentEntity apartment : apartmentsForDisabledResult) {
+            apartmentForDisabledIdsResult.add(apartment.getId());
+        }
+
+        for (Long id : apartmentsFodDisabledIds) {
+            assertTrue(apartmentForDisabledIdsResult.contains(id));
+        }
     }
 
     @Test

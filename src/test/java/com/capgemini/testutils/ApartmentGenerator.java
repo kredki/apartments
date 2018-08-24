@@ -19,6 +19,44 @@ public class ApartmentGenerator {
         return ApartmentEntity.builder()
                 .balconyQty(1)
                 .floor(0)
+                .status("free")
+                .price(new BigDecimal("50000.00"))
+                .roomQty(3)
+                .area(new BigDecimal(100.00))
+                .address(address)
+                .build();
+    }
+
+    public ApartmentEntity getApartmentWithFloor0() {
+        AddressInTable address= AddressInTable.builder()
+                .city("city")
+                .no("no")
+                .postalCode("postal code")
+                .street("street")
+                .build();
+
+        return ApartmentEntity.builder()
+                .balconyQty(1)
+                .floor(0)
+                .status("sold")
+                .price(new BigDecimal("50000.00"))
+                .roomQty(3)
+                .area(new BigDecimal(100.00))
+                .address(address)
+                .build();
+    }
+
+    public ApartmentEntity getApartmentWithFloor1() {
+        AddressInTable address= AddressInTable.builder()
+                .city("city")
+                .no("no")
+                .postalCode("postal code")
+                .street("street")
+                .build();
+
+        return ApartmentEntity.builder()
+                .balconyQty(1)
+                .floor(1)
                 .status("sold")
                 .price(new BigDecimal("50000.00"))
                 .roomQty(3)
