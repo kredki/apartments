@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ApartmenRepositoryTest {
     @Autowired
-    private ApartmentRepository apartmenRepository;
+    private ApartmentRepository apartmentRepository;
     @Autowired
     private BuildingRepository buildingRepository;
     @Autowired
@@ -140,12 +140,12 @@ public class ApartmenRepositoryTest {
         mainOwner = clientRepository.save(mainOwner);
         coowner = clientRepository.save(coowner);
 
-        apartment1 = apartmenRepository.save(apartment1);
-        apartment2 = apartmenRepository.save(apartment2);
-        apartment3 = apartmenRepository.save(apartment3);
+        apartment1 = apartmentRepository.save(apartment1);
+        apartment2 = apartmentRepository.save(apartment2);
+        apartment3 = apartmentRepository.save(apartment3);
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByMainOwner(mainOwner.getId());
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByMainOwner(mainOwner.getId());
 
         //then
         assertThat(result).isNotNull().isNotEmpty();
@@ -182,7 +182,7 @@ public class ApartmenRepositoryTest {
         //get apartments ids for disabled
         List<Long> apartmentsFodDisabledIds = new ArrayList<>();
         List<BuildingEntity> buildings = buildingRepository.findAll();
-        List<ApartmentEntity> a = apartmenRepository.findAll();
+        List<ApartmentEntity> a = apartmentRepository.findAll();
         for (BuildingEntity building : buildings) {
             Set<ApartmentEntity> apartmentsFromBuilding = building.getApartments();
             Boolean isElevatorPresent = building.getIsElevatorPresent();
@@ -194,7 +194,7 @@ public class ApartmenRepositoryTest {
         }
 
         //when
-        List<ApartmentEntity> apartmentsForDisabledResult = apartmenRepository.findApartmentsForDisabled();
+        List<ApartmentEntity> apartmentsForDisabledResult = apartmentRepository.findApartmentsForDisabled();
 
         //then
         assertThat(apartmentsForDisabledResult).isNotNull().isNotEmpty();
@@ -212,20 +212,29 @@ public class ApartmenRepositoryTest {
     @Test
     public void shouldAddApartment() {
         //given
-        long clientsQty = apartmenRepository.count();
+        long clientsQty = apartmentRepository.count();
         AddressInTable address = AddressInTable.builder().city("city").no("no").postalCode("code").street("street").build();
         ApartmentEntity apertment = ApartmentEntity.builder().address(address).area(new BigDecimal("5000"))
                 .roomQty(10).price(new BigDecimal("1.29")).status("FREE").floor(0).balconyQty(12).build();
 
         //when
-        ApartmentEntity savedApartment = apartmenRepository.save(apertment);
+        ApartmentEntity savedApartment = apartmentRepository.save(apertment);
 
         //then
-        assertEquals(clientsQty + 1, apartmenRepository.count());
+        assertEquals(clientsQty + 1, apartmentRepository.count());
         assertEquals(apertment.getArea(), savedApartment.getArea());
         assertEquals(apertment.getBalconyQty(), savedApartment.getBalconyQty());
         assertEquals(apertment.getFloor(), savedApartment.getFloor());
         assertEquals(apertment.getPrice(), savedApartment.getPrice());
+    }
+
+    @Test
+    public void shouldFindByNullCriteria() {
+        //when
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(null);
+
+        //then
+        assertThat(result).isNotNull().isEmpty();
     }
 
     @Test
@@ -241,7 +250,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(1, result.size());
@@ -262,7 +271,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(0, result.size());
@@ -276,7 +285,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
@@ -296,7 +305,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
@@ -316,7 +325,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
@@ -336,7 +345,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
@@ -356,7 +365,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
@@ -376,7 +385,7 @@ public class ApartmenRepositoryTest {
                 .build();
 
         //when
-        List<ApartmentEntity> result = apartmenRepository.findApartmentsByCriteria(criteria);
+        List<ApartmentEntity> result = apartmentRepository.findApartmentsByCriteria(criteria);
 
         //then
         assertEquals(2, result.size());
