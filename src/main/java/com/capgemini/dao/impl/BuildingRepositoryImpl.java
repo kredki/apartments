@@ -2,6 +2,10 @@ package com.capgemini.dao.impl;
 
 import com.capgemini.dao.BuildingRepositoryCustom;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.domain.QApartmentEntity;
+import com.capgemini.domain.QBuildingEntity;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -55,11 +59,32 @@ public class BuildingRepositoryImpl implements BuildingRepositoryCustom {
      */
     @Override
     public List<BuildingEntity> findBuildingWithMostFreeApartments() {
-        TypedQuery<BuildingEntity> query = entityManager.createQuery(
+        JPAQuery<BuildingEntity> query = new JPAQuery(entityManager);
+        JPAQuery<Long> query2 = new JPAQuery(entityManager);
+        JPAQuery<Long> query3 = new JPAQuery(entityManager);
+        QBuildingEntity building = QBuildingEntity.buildingEntity;
+        QApartmentEntity apartment = QApartmentEntity.apartmentEntity;
+        query2 = query2.select(apartment.count()).from(apartment).where(apartment.status.lower().eq("free"))
+                .groupBy(apartment.building);
+
+        List<BuildingEntity> result = query.select(building).from(building)
+                .where(building.in(
+                        JPAExpressions.select(apartment.building)
+                .where(apartment.in(
+                        JPAExpressions.select(apartment)
+                        .where(apartment.status.lower().eq("free"))
+                        .groupBy(apartment.building)
+                        .having(apartment.count().eq(
+                                JPAExpressions.select(query2.select(apartment.count().max()))
+                        ))
+                )))
+        ).fetch();
+        /*TypedQuery<BuildingEntity> query = entityManager.createQuery(
                 "select b from BuildingEntity b where b.id in " +
-                        "(select a.building.id from ApartmentEntity a group by a.building.id " +
-                        "having max(building.id) and upper(a.status) like upper('free')",
+                        "(select a.building.id, max(count(a)) from ApartmentEntity a group by a.building.id " +
+                        "having upper(a.status) like upper('free'))",
                 BuildingEntity.class);
-        return query.getResultList();
+        return query.getResultList();*/
+        return result;
     }
 }
