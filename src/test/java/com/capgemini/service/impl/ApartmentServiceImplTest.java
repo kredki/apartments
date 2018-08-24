@@ -1,5 +1,6 @@
 package com.capgemini.service.impl;
 
+import com.capgemini.dao.ApartmentRepository;
 import com.capgemini.dao.BuildingRepository;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -28,6 +30,8 @@ public class ApartmentServiceImplTest {
     private ApartmentServiceImpl apartmentService;
     @Autowired
     private BuildingRepository buildingRepository;
+    @Autowired
+    ApartmentRepository apartmentRepository;
 
     private BuildingEntity building;
 
@@ -47,6 +51,44 @@ public class ApartmentServiceImplTest {
                 .apartments(new HashSet<>())
                 .build();
         building = buildingRepository.save(building);
+    }
+
+    @Test
+    public void shouldNotAddApartment() {
+        //given
+        long countBefore = apartmentRepository.count();
+
+        //when
+        ApartmentTO apartment = apartmentService.addNewApartment(null, building.getId());
+
+        //then
+        assertThat(apartment).isNull();
+        assertThat(apartmentRepository.count()).isEqualTo(countBefore);
+    }
+
+    @Test
+    public void shouldNotAddApartment2() {
+        //given
+        long countBefore = apartmentRepository.count();
+        AddressTO address = AddressTO.builder()
+                .city("c").no("n")
+                .postalCode("pc")
+                .street("s")
+                .build();
+        ApartmentTO apartmentToAdd = ApartmentTO.builder()
+                .address(address).area(new BigDecimal("50"))
+                .balconyQty(1)
+                .building(null)
+                .floor(0).price(new BigDecimal("120000"))
+                .status("free")
+                .build();
+
+        //when
+        ApartmentTO apartment = apartmentService.addNewApartment(apartmentToAdd, null);
+
+        //then
+        assertThat(apartment).isNull();
+        assertThat(apartmentRepository.count()).isEqualTo(countBefore);
     }
 
     @Test

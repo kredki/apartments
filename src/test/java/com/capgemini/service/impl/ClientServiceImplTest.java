@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -114,6 +115,43 @@ public class ClientServiceImplTest {
         assertEquals(clientA.getTelephone(), savedClient.getTelephone());
         assertEquals(clientA.getFirstName(), savedClient.getFirstName());
         assertEquals(new Long(versionBefore + 1L), savedClient.getVersion());
+    }
+
+    @Test
+    public void shouldNotAddNewClient() {
+        //given
+        long countBefore = clientRepository.count();
+
+        //when
+        ClientTO client = clientService.addNewClient(null);
+
+        //then
+        assertThat(client).isNull();
+        assertThat(clientRepository.count()).isEqualTo(countBefore);
+    }
+
+    @Test
+    public void shouldNotUpdateClient() {
+        //given
+        List<ClientEntity> clientsBefore = clientRepository.findAll();
+
+        //when
+        ClientTO client = clientService.updateClient(null);
+
+        //then
+        assertThat(client).isNull();
+        List<ClientEntity> clientsAfter = clientRepository.findAll();
+        for (ClientEntity clientBefore : clientsBefore) {
+            Long clientBeforeId = clientBefore.getId();
+            for (ClientEntity clientAfter : clientsAfter) {
+                if(clientAfter.getId() == clientBeforeId) {
+                    assertEquals(clientBefore.getLastName(), clientAfter.getLastName());
+                    assertEquals(clientBefore.getTelephone(), clientAfter.getTelephone());
+                    assertEquals(clientBefore.getFirstName(), clientAfter.getFirstName());
+                    assertEquals(clientBefore.getVersion(), clientAfter.getVersion());
+                }
+            }
+        }
     }
 
     @Test
