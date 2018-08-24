@@ -65,7 +65,7 @@ public class ApartmenRepositoryTest {
         Set<ApartmentEntity> apartments = new HashSet<>();
         apartment1 = ApartmentEntity.builder()
                 .balconyQty(1)
-                .floor(0)
+                .floor(1)
                 .status("sold")
                 .price(price1)
                 .roomQty(3)
@@ -121,11 +121,14 @@ public class ApartmenRepositoryTest {
         apartments.add(apartment2);
 
         building1.setApartments(apartments);
+        apartment1.setBuilding(building1);
+        apartment2.setBuilding(building1);
         buildingRepository.save(building1);
 
         //get apartments ids for disabled
         List<Long> apartmentsFodDisabledIds = new ArrayList<>();
         List<BuildingEntity> buildings = buildingRepository.findAll();
+        List<ApartmentEntity> a = apartmenRepository.findAll();
         for (BuildingEntity building : buildings) {
             Set<ApartmentEntity> apartmentsFromBuilding = building.getApartments();
             Boolean isElevatorPresent = building.getIsElevatorPresent();

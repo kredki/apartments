@@ -131,8 +131,8 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
     @Override
     public List<ApartmentEntity> findApartmentsForDisabled() {
         TypedQuery<ApartmentEntity> query = entityManager.createQuery(
-                "select a from ApartmentEntity a where a.building.isElevatorPresent = true or " +
-                        "a.floor = 0", ApartmentEntity.class);
+                "select a from ApartmentEntity a where (a.building.isElevatorPresent = true) or " +
+                        "(a.floor = 0)", ApartmentEntity.class);
         return query.getResultList();
     }
 }
