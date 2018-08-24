@@ -3,6 +3,7 @@ package com.capgemini.dao;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.domain.ClientEntity;
 import com.capgemini.testutils.ApartmentGenerator;
 import com.capgemini.types.ApartmentSearchCriteria;
 import org.junit.Before;
@@ -15,14 +16,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
@@ -34,6 +32,8 @@ public class ApartmenRepositoryTest {
     private BuildingRepository buildingRepository;
     @Autowired
     ApartmentGenerator apartmentGenerator;
+    @Autowired
+    ClientRepository clientRepository;
 
     private ApartmentEntity apartment1;
     private ApartmentEntity apartment2;
@@ -104,6 +104,60 @@ public class ApartmenRepositoryTest {
 
     @Test
     @Transactional
+    public void shouldFindApartmentByMainOwner() {
+        //given
+        ClientEntity mainOwner = ClientEntity.builder()
+                .telephone("tel1")
+                .lastName("Iksinski")
+                .firstName("Andrzej")
+                .address(address)
+                .build();
+        ClientEntity coowner = ClientEntity.builder()
+                .telephone("tel2")
+                .lastName("Nowak")
+                .firstName("Jan")
+                .address(address)
+                .build();
+
+        Set<ApartmentEntity> apartments = new HashSet<>();
+        ApartmentEntity apartment1 = apartmentGenerator.getApartmentWithFloor0();
+        apartments.add(apartment1);
+        ApartmentEntity apartment2 = apartmentGenerator.getApartmentWithFloor1();
+        apartments.add(apartment2);
+        apartment1.setMainOwner(mainOwner);
+        apartment1.setOwners(Collections.singleton(mainOwner));
+        apartment2.setMainOwner(mainOwner);
+        Set<ClientEntity> owners = new HashSet<>();
+        owners.add(mainOwner);
+        owners.add(coowner);
+        apartment2.setOwners(owners);
+        mainOwner.setApartments(apartments);
+
+        ApartmentEntity apartment3 = apartmentGenerator.getApartmentWithFloor1();
+        apartment3.setMainOwner(coowner);
+        apartment3.setOwners(owners);
+
+        mainOwner = clientRepository.save(mainOwner);
+        coowner = clientRepository.save(coowner);
+
+        apartment1 = apartmenRepository.save(apartment1);
+        apartment2 = apartmenRepository.save(apartment2);
+        apartment3 = apartmenRepository.save(apartment3);
+
+        //when
+        List<ApartmentEntity> result = apartmenRepository.findApartmentsByMainOwner(mainOwner.getId());
+
+        //then
+        assertThat(result).isNotNull().isNotEmpty();
+        assertThat(result.size()).isEqualTo(2);
+        List<Long> ids = result.stream().map(x -> x.getId()).collect(Collectors.toList());
+        assertTrue(ids.contains(apartment1.getId()));
+        assertTrue(ids.contains(apartment2.getId()));
+        assertFalse(ids.contains(apartment3.getId()));
+    }
+
+    @Test
+    @Transactional
     public void shouldFindApartmentsForDisabled() {
         //given
         BuildingEntity building1 = BuildingEntity.builder()
@@ -133,7 +187,7 @@ public class ApartmenRepositoryTest {
             Set<ApartmentEntity> apartmentsFromBuilding = building.getApartments();
             Boolean isElevatorPresent = building.getIsElevatorPresent();
             for (ApartmentEntity apartment : apartmentsFromBuilding) {
-                if(isElevatorPresent || apartment.getFloor() == 0) {
+                if (isElevatorPresent || apartment.getFloor() == 0) {
                     apartmentsFodDisabledIds.add(apartment.getId());
                 }
             }
