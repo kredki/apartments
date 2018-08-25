@@ -62,4 +62,11 @@ public class ApartmentEntity extends AbstractEntity implements Serializable {
     public Set<ClientEntity> getOwners() {
         return Objects.isNull(owners) ? new HashSet<>() : owners;
     }
+
+    public void addOwner(ClientEntity ownerToAdd) {
+        if(this.owners == null) {
+            this.owners = new HashSet<>();
+        }
+        owners.add(ownerToAdd);
+    }
 }

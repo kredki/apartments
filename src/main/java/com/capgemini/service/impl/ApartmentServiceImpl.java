@@ -1,12 +1,15 @@
 package com.capgemini.service.impl;
 
 import com.capgemini.dao.ApartmentRepository;
+import com.capgemini.dao.ClientRepository;
 import com.capgemini.domain.ApartmentEntity;
+import com.capgemini.domain.ClientEntity;
 import com.capgemini.mappers.ApartmentMapper;
 import com.capgemini.service.ApartmentService;
 import com.capgemini.types.ApartmentTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,9 +19,11 @@ import java.util.List;
 @Service
 public class ApartmentServiceImpl implements ApartmentService {
     @Autowired
-    ApartmentMapper apartmentMapper;
+    private ApartmentMapper apartmentMapper;
     @Autowired
-    ApartmentRepository apartmentRepository;
+    private ApartmentRepository apartmentRepository;
+    @Autowired
+    private ClientRepository clientRepository;
 
     /**
      * Add new apartment to building.
@@ -27,6 +32,7 @@ public class ApartmentServiceImpl implements ApartmentService {
      * @return Added apartment.
      */
     @Override
+    @Transactional
     public ApartmentTO addNewApartment(ApartmentTO apartmentToAdd, Long buildingId) {
         if(apartmentToAdd == null || buildingId == null) {
             return null;
@@ -41,6 +47,7 @@ public class ApartmentServiceImpl implements ApartmentService {
      * @return Apartment after update.
      */
     @Override
+    @Transactional
     public ApartmentTO updateApartment(ApartmentTO apartmentToUpdate) {
         if(apartmentToUpdate == null) {
             return null;
@@ -55,6 +62,7 @@ public class ApartmentServiceImpl implements ApartmentService {
      * @param apartmentId Apartment id.
      */
     @Override
+    @Transactional
     public void removeApartment(Long apartmentId) {
         if(apartmentRepository.findOne(apartmentId) == null) {
             return;
@@ -67,6 +75,7 @@ public class ApartmentServiceImpl implements ApartmentService {
      * @return All apartments.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ApartmentTO> findAll() {
         return apartmentMapper.map2TOs(apartmentRepository.findAll());
     }
@@ -77,7 +86,35 @@ public class ApartmentServiceImpl implements ApartmentService {
      * @return Requested apartment.
      */
     @Override
+    @Transactional(readOnly = true)
     public ApartmentTO findById(Long id) {
         return apartmentMapper.toTO(apartmentRepository.findOne(id));
+    }
+
+    /**
+     * Add reservation for apartment.
+     * @param clientId Client id.
+     * @param apartmentId Apartment id.
+     * @return True if successful, false if not.
+     */
+    @Override
+    @Transactional
+    public boolean addReservation(Long clientId, Long apartmentId) {
+        ApartmentEntity apartment = apartmentRepository.findOne(apartmentId);
+        ClientEntity client = clientRepository.findOne(clientId);
+        if(apartment == null || client == null) {
+            return false;
+        }
+        int reservedApartmentsQty = apartmentRepository.findReservedApartmentsForClient(clientId).size();
+        if(reservedApartmentsQty <= 3 && apartment.getStatus().toLowerCase().equals("free") &&
+                apartment.getMainOwner() == null) {
+            apartment.setMainOwner(client);
+            apartment.addOwner(client);
+            client.addApartment(apartment);
+            apartmentRepository.save(apartment);
+            clientRepository.save(client);
+            return true;
+        }
+        return false;
     }
 }

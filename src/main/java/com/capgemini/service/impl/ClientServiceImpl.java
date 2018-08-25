@@ -6,7 +6,6 @@ import com.capgemini.service.ClientService;
 import com.capgemini.types.ClientTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,9 +16,9 @@ import java.util.List;
 @Service
 public class ClientServiceImpl implements ClientService {
     @Autowired
-    ClientRepository clientRepository;
+    private ClientRepository clientRepository;
     @Autowired
-    ClientMapper clientMapper;
+    private ClientMapper clientMapper;
 
     /**
      * Add new client.
@@ -27,7 +26,7 @@ public class ClientServiceImpl implements ClientService {
      * @return Added client.
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional
     public ClientTO addNewClient(ClientTO clientToAdd) {
         if(clientToAdd == null) {
             return null;
@@ -41,7 +40,7 @@ public class ClientServiceImpl implements ClientService {
      * @return Updated client.
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional
     public ClientTO updateClient(ClientTO clientToUpdate) {
         if(clientToUpdate == null) {
             return null;
@@ -54,7 +53,7 @@ public class ClientServiceImpl implements ClientService {
      * @param clientId Client id.
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional
     public void removeClient(Long clientId) {
         if (clientId != null) {
             clientRepository.delete(clientId);
@@ -66,7 +65,7 @@ public class ClientServiceImpl implements ClientService {
      * @return All clients.
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, readOnly=true)
+    @Transactional(readOnly=true)
     public List<ClientTO> findAll() {
         return clientMapper.map2TOs(clientRepository.findAll());
     }
@@ -77,7 +76,7 @@ public class ClientServiceImpl implements ClientService {
      * @return Requested client.
      */
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, readOnly=true)
+    @Transactional(readOnly=true)
     public ClientTO findById(Long id) {
         return clientMapper.toTO(clientRepository.findOne(id));
     }

@@ -3,6 +3,7 @@ package com.capgemini.service.impl;
 import com.capgemini.service.BuildingService;
 import com.capgemini.types.BuildingTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class BuildingServiceImpl implements BuildingService {
      * @return Added building.
      */
     @Override
+    @Transactional
     public BuildingTO addNewBuilding(BuildingTO buildingToAdd) {
         return null;
     }
@@ -27,6 +29,7 @@ public class BuildingServiceImpl implements BuildingService {
      * @return Updated building.
      */
     @Override
+    @Transactional
     public BuildingTO updateBuilding(BuildingTO buildingToUpdate) {
         return null;
     }
@@ -36,6 +39,7 @@ public class BuildingServiceImpl implements BuildingService {
      * @param buildingId Building id.
      */
     @Override
+    @Transactional
     public void removeBuilding(Long buildingId) {
 
     }
@@ -45,6 +49,7 @@ public class BuildingServiceImpl implements BuildingService {
      * @return
      */
     @Override
+    @Transactional(readOnly = true)
     public List<BuildingTO> findAll() {
         return null;
     }
@@ -55,6 +60,7 @@ public class BuildingServiceImpl implements BuildingService {
      * @return Requested building.
      */
     @Override
+    @Transactional(readOnly = true)
     public BuildingTO findById(Long id) {
         return null;
     }

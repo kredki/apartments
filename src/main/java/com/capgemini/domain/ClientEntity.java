@@ -43,4 +43,11 @@ public class ClientEntity extends AbstractEntity implements Serializable {
     public Set<ApartmentEntity> getApartments() {
         return Objects.isNull(apartments) ? new HashSet<>() : apartments;
     }
+
+    public void addApartment(ApartmentEntity apartmentToAdd) {
+        if(this.apartments == null) {
+            this.apartments = new HashSet<>();
+        }
+        apartments.add(apartmentToAdd);
+    }
 }

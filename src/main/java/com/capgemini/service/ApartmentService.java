@@ -41,4 +41,12 @@ public interface ApartmentService {
      * @return Requested apartment.
      */
     public ApartmentTO findById(Long id);
+
+    /**
+     * Add reservation for apartment.
+     * @param clientId Client id.
+     * @param apartmentId Apartment id.
+     * @return True if successful, false if not.
+     */
+    public boolean addReservation(Long clientId, Long apartmentId);
 }
