@@ -5,6 +5,8 @@ import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.domain.ClientEntity;
 import com.capgemini.testutils.ApartmentGenerator;
+import com.capgemini.testutils.BuildingGenerator;
+import com.capgemini.testutils.ClientGenerator;
 import com.capgemini.types.ApartmentSearchCriteria;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +36,10 @@ public class ApartmenRepositoryTest {
     ApartmentGenerator apartmentGenerator;
     @Autowired
     ClientRepository clientRepository;
+    @Autowired
+    private BuildingGenerator buildingGenerator;
+    @Autowired
+    private ClientGenerator clientGenerator;
 
     private ApartmentEntity apartment1;
     private ApartmentEntity apartment2;
@@ -100,6 +106,113 @@ public class ApartmenRepositoryTest {
         apartments.add(apartment3);
         building.setApartments(apartments);
         buildingRepository.save(building);
+    }
+
+    @Test
+    @Transactional
+    public void shouldReturnApartmentsForClient() {
+        //given
+        ClientEntity client1 = clientGenerator.getClient();
+        ClientEntity client2 = clientGenerator.getClient();
+        Set<ClientEntity> owners = new HashSet<>();
+        owners.add(client1);
+        owners.add(client2);
+
+        BuildingEntity building = buildingGenerator.getBuilding();
+
+        Set<ApartmentEntity> client1Apartments = new HashSet<>();
+        Set<ApartmentEntity> client2Apartments = new HashSet<>();
+
+        ApartmentEntity apartment1 = apartmentGenerator.getReservedApartment();
+        apartment1.setMainOwner(client1);
+        apartment1.setOwners(Collections.singleton(client1));
+        apartment1.setBuilding(building);
+        apartment1 = apartmentRepository.save(apartment1);
+        client1Apartments.add(apartment1);
+
+        ApartmentEntity apartment2 = apartmentGenerator.getReservedApartment();
+        apartment2.setMainOwner(client1);
+        apartment2.setOwners(owners);
+        apartment2.setBuilding(building);
+        apartment2 = apartmentRepository.save(apartment2);
+        client1Apartments.add(apartment2);
+        client2Apartments.add(apartment2);
+
+        ApartmentEntity apartment3 = apartmentGenerator.getReservedApartment();
+        apartment3.setMainOwner(client2);
+        apartment3.setOwners(owners);
+        apartment3.setBuilding(building);
+        apartment3 = apartmentRepository.save(apartment3);
+        client1Apartments.add(apartment3);
+        client2Apartments.add(apartment3);
+
+        ApartmentEntity apartment4 = apartmentGenerator.getSoldApartment();
+        apartment4.setMainOwner(client1);
+        apartment4.setOwners(owners);
+        apartment4.setBuilding(building);
+        apartment4 = apartmentRepository.save(apartment4);
+        client1Apartments.add(apartment4);
+        client2Apartments.add(apartment4);
+
+        ApartmentEntity apartment5 = apartmentGenerator.getSoldApartment();
+        apartment5.setMainOwner(client2);
+        apartment5.setOwners(owners);
+        apartment5.setBuilding(building);
+        apartment5 = apartmentRepository.save(apartment5);
+        client1Apartments.add(apartment5);
+        client2Apartments.add(apartment5);
+
+        client1 = clientRepository.save(client1);
+        client2 = clientRepository.save(client2);
+
+        //when
+        List<ApartmentEntity> result = apartmentRepository.findReservedApartmentsForClient(client1.getId());
+
+        //then
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(2);
+        List<Long> ids = result.stream().map(x -> x.getId()).collect(Collectors.toList());
+        assertTrue(ids.contains(apartment1.getId()));
+        assertTrue(ids.contains(apartment2.getId()));
+        assertFalse(ids.contains(apartment3.getId()));
+        assertFalse(ids.contains(apartment4.getId()));
+        assertFalse(ids.contains(apartment5.getId()));
+    }
+
+    @Test
+    public void shouldNotReturnApartmentsForClient() {
+        //when
+        List<ApartmentEntity> result = apartmentRepository.findReservedApartmentsForClient(null);
+
+        //then
+        assertThat(result).isNotNull().isEmpty();
+    }
+
+    @Test
+    public void shouldNotReturnApartmentsForClient2() {
+        //given
+        List<ClientEntity> clientsBefore = clientRepository.findAll();
+        List<Long> idsBefore = clientsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
+        Optional<Long> max = idsBefore.stream().max(Comparator.naturalOrder());
+        Long idNotInDB = 1L;
+        if (max.isPresent()) {
+            idNotInDB = max.get() + 1;
+        }
+
+        //when
+        List<ApartmentEntity> result = apartmentRepository.findReservedApartmentsForClient(idNotInDB);
+
+        //then
+        assertThat(result).isNotNull().isEmpty();
+    }
+
+    @Test
+    public void shouldNotReturnApartmentsForClient3() {
+        //when
+        List<ApartmentEntity> result = apartmentRepository.findReservedApartmentsForClient(-1L);
+
+        //then
+        assertThat(result).isNotNull().isEmpty();
     }
 
     @Test

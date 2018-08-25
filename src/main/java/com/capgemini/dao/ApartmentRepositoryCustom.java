@@ -32,4 +32,11 @@ public interface ApartmentRepositoryCustom {
      * @return Apartments with elevator in building or on ground floor.
      */
     public List<ApartmentEntity> findApartmentsForDisabled();
+
+    /**
+     * Find reserved apartments for client.
+     * @param clientId client id.
+     * @return Reserved apartments for client.
+     */
+    public List<ApartmentEntity> findReservedApartmentsForClient(Long clientId);
 }

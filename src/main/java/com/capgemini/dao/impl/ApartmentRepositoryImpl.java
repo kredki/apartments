@@ -135,4 +135,22 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
                         "(a.floor = 0)", ApartmentEntity.class);
         return query.getResultList();
     }
+
+    /**
+     * Find reserved apartments for client.
+     * @param clientId client id.
+     * @return Reserved apartments for client.
+     */
+    @Override
+    public List<ApartmentEntity> findReservedApartmentsForClient(Long clientId) {
+        if (clientId == null) {
+            return new ArrayList<>();
+        }
+        ClientEntity client = entityManager.getReference(ClientEntity.class, clientId);
+        TypedQuery<ApartmentEntity> query = entityManager.createQuery(
+                "select a from ApartmentEntity a where (a.mainOwner = :client) and " +
+                        "(upper(a.status) like upper('reserved'))", ApartmentEntity.class);
+        query.setParameter("client", client);
+        return query.getResultList();
+    }
 }

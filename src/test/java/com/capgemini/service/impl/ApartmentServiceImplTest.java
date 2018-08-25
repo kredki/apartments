@@ -33,9 +33,9 @@ public class ApartmentServiceImplTest {
     @Autowired
     private BuildingRepository buildingRepository;
     @Autowired
-    ApartmentRepository apartmentRepository;
+    private ApartmentRepository apartmentRepository;
     @Autowired
-    ApartmentGenerator apartmentGenerator;
+    private ApartmentGenerator apartmentGenerator;
 
     private BuildingEntity building;
     private AddressTO addressTO;
@@ -148,7 +148,7 @@ public class ApartmentServiceImplTest {
         Optional<Long> max = idsBefore.stream().max(Comparator.naturalOrder());
         Long idNotInDB = 1L;
         if(max.isPresent()) {
-            idNotInDB = max.get();
+            idNotInDB = max.get() + 1;
         }
 
         //when
