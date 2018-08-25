@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.EntityManager;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
 public class ClientRepositoryTest {
     @Autowired
@@ -210,6 +211,7 @@ public class ClientRepositoryTest {
                 .lastName("Kowalski")
                 .firstName("Stefan")
                 .address(address)
+                .apartments(new HashSet<>())
                 .version(versionBefore)
                 .build();
         ClientEntity clientB = ClientEntity.builder()
@@ -218,6 +220,7 @@ public class ClientRepositoryTest {
                 .lastName("Kowalski2")
                 .firstName("Stefan2")
                 .address(address)
+                .apartments(new HashSet<>())
                 .version(versionBefore)
                 .build();
 

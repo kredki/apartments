@@ -167,6 +167,8 @@ public class ApartmentServiceImplTest {
     @Transactional
     public void shouldRemoveApartment() {
         //given
+        List<ApartmentEntity> apartmentsBefore = apartmentRepository.findAll();
+        List<Long> idsBefore = apartmentsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
         ApartmentEntity apartmentBefore = ApartmentEntity.builder()
                 .address(addressInTable)
                 .area(new BigDecimal("50"))
@@ -179,8 +181,6 @@ public class ApartmentServiceImplTest {
                 .build();
         apartmentBefore = apartmentRepository.save(apartmentBefore);
         long apartmentQtyBefore = apartmentRepository.count();
-        List<ApartmentEntity> apartmentsBefore = apartmentRepository.findAll();
-        List<Long> idsBefore = apartmentsBefore.stream().map(x -> x.getId()).collect(Collectors.toList());
 
         //when
         apartmentService.removeApartment(apartmentBefore.getId());
@@ -220,6 +220,7 @@ public class ApartmentServiceImplTest {
                 .floor(10)
                 .roomQty(1)
                 .price(new BigDecimal("1200000"))
+                .version(apartmentBefore.getVersion())
                 .status("sold")
                 .build();
 

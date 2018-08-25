@@ -1,6 +1,7 @@
 package com.capgemini.service.impl;
 
 import com.capgemini.dao.ApartmentRepository;
+import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.mappers.ApartmentMapper;
 import com.capgemini.service.ApartmentService;
 import com.capgemini.types.ApartmentTO;
@@ -44,7 +45,9 @@ public class ApartmentServiceImpl implements ApartmentService {
         if(apartmentToUpdate == null) {
             return null;
         }
-        return apartmentMapper.toTO(apartmentRepository.save(apartmentMapper.toEntity(apartmentToUpdate)));
+        ApartmentEntity apartmentEntity = apartmentMapper.toEntity(apartmentToUpdate);
+        ApartmentEntity savedApartment = apartmentRepository.save(apartmentEntity);
+        return apartmentMapper.toTO(savedApartment);
     }
 
     /**

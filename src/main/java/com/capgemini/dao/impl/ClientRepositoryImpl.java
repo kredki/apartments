@@ -39,8 +39,11 @@ public class ClientRepositoryImpl implements ClientRepositoryCustom {
     @Override
     public List<ClientEntity> findClientsWithMoreThanOneApartment() {
         TypedQuery<ClientEntity> query = entityManager.createQuery(
-                "select c from ClientEntity c where c.id in " +
-                        "(select c2.id from ClientEntity c2 where count(c.apartments) > 1)", ClientEntity.class);
+                "select c from ClientEntity c " +
+                        "join c.apartments a " +
+                        "where c member of a.owners " +
+                        "group by c.id " +
+                        "having count(c.apartments) > 1", ClientEntity.class);
         return query.getResultList();
     }
 }
