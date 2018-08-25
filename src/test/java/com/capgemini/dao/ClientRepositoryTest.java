@@ -11,9 +11,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -27,7 +28,8 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.profiles.active=hsql")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 public class ClientRepositoryTest {
     @Autowired
     ClientRepository clientRepository;
@@ -37,6 +39,8 @@ public class ClientRepositoryTest {
     ApartmentGenerator apartmentGenerator;
     @Autowired
     ClientGenerator clientGenerator;
+    @PersistenceContext
+    EntityManager entityManager;
 
     private AddressInTable address;
     private ClientEntity client1;
@@ -55,6 +59,8 @@ public class ClientRepositoryTest {
                 .firstName("Andrzej")
                 .address(address)
                 .build();
+
+        client1 = clientRepository.save(client1);
 
         BigDecimal price1 = new BigDecimal("123000.12");
         BigDecimal area1 = new BigDecimal("12.12");
@@ -98,16 +104,19 @@ public class ClientRepositoryTest {
                 .build();
         apartments.add(apartment2);
         client1 = clientRepository.save(client1);
-        apartmentRepository.save(apartment1);
-        apartmentRepository.save(apartment2);
-        apartmentRepository.save(apartment3);/*
+        apartment1 = apartmentRepository.save(apartment1);
+        apartment2 = apartmentRepository.save(apartment2);
+        apartment3 = apartmentRepository.save(apartment3);
+
+        Set<ClientEntity> owners = new HashSet<>();
+        owners.add(client1);
 
         apartment1.setMainOwner(client1);
         apartment2.setMainOwner(client1);
         apartment3.setMainOwner(client1);
-        apartment1.setOwners(Collections.singleton(client1));
-        apartment2.setOwners(Collections.singleton(client1));
-        apartment3.setOwners(Collections.singleton(client1));*/
+        apartment1.setOwners(owners);
+        apartment2.setOwners(owners);
+        apartment3.setOwners(owners);
         apartmentRepository.save(apartment1);
         apartmentRepository.save(apartment2);
         apartmentRepository.save(apartment3);
@@ -156,6 +165,7 @@ public class ClientRepositoryTest {
     }
 
     @Test
+    @Transactional
     public void shouldFindApartmentsWorthForClient() {
         //
         BigDecimal expectedPriceSum = new BigDecimal("246000.24");
@@ -213,6 +223,7 @@ public class ClientRepositoryTest {
 
         //when
         clientRepository.save(clientA);
+        entityManager.flush();
         try {
             clientRepository.save(clientB);
             fail();

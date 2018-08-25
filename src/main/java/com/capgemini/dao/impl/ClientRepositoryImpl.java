@@ -25,11 +25,11 @@ public class ClientRepositoryImpl implements ClientRepositoryCustom {
     @Override
     public BigDecimal findApartmentsWorthForClient(Long clientId) {
         ClientEntity client = entityManager.getReference(ClientEntity.class, clientId);
-        TypedQuery<Double> query = entityManager.createQuery(
-                "select sum(a.price) from ApartmentEntity a where :client member of a.owners", Double.class);
+        TypedQuery<BigDecimal> query = entityManager.createQuery(
+                "select sum(a.price) from ApartmentEntity a where :client member of a.owners" +
+                        " and lower(a.status) like lower('sold')", BigDecimal.class);
         query.setParameter("client", client);
-        Double result = query.getSingleResult();
-        return new BigDecimal(result);
+        return query.getSingleResult();
     }
 
     /**
@@ -40,7 +40,7 @@ public class ClientRepositoryImpl implements ClientRepositoryCustom {
     public List<ClientEntity> findClientsWithMoreThanOneApartment() {
         TypedQuery<ClientEntity> query = entityManager.createQuery(
                 "select c from ClientEntity c where c.id in " +
-                        "(select c2.id from ClientEntity c2 where count(c.apartments) > 1", ClientEntity.class);
+                        "(select c2.id from ClientEntity c2 where count(c.apartments) > 1)", ClientEntity.class);
         return query.getResultList();
     }
 }
