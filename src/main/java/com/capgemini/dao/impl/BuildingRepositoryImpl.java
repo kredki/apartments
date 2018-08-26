@@ -4,7 +4,6 @@ import com.capgemini.dao.BuildingRepositoryCustom;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.domain.QApartmentEntity;
 import com.capgemini.domain.QBuildingEntity;
-import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -61,33 +60,23 @@ public class BuildingRepositoryImpl implements BuildingRepositoryCustom {
     @Override
     public List<BuildingEntity> findBuildingWithMostFreeApartments() {
         JPAQuery<BuildingEntity> query = new JPAQuery(entityManager);
-        JPAQuery<Tuple> query2 = new JPAQuery(entityManager);
-        JPAQuery<Long> query3 = new JPAQuery(entityManager);
+        JPAQuery<Long> query1 = new JPAQuery(entityManager);
         QBuildingEntity building = QBuildingEntity.buildingEntity;
         QApartmentEntity apartment = QApartmentEntity.apartmentEntity;
-        query2 = query2.select(apartment.count(), apartment.building.id).from(apartment).where(apartment.status.lower().eq("free"))
-                .groupBy(apartment.building);
-
-    List<BuildingEntity> result = query.select(building).from(building)
-                .where(building.in(
-                        JPAExpressions.select(apartment.building)
-                .where(apartment.in(
-                        JPAExpressions.select(apartment)
-                        .where(apartment.status.lower().eq("free"))
-                        .groupBy(apartment.building)
-                        .having(apartment.count().eq(
-                                JPAExpressions.select(query2.select(apartment.count().max()))
-                        ))
-                )))
-        ).fetch();
-
-        /*TypedQuery<BuildingEntity> queryB = entityManager.createQuery(
-                "select b from BuildingEntity b " +
-                        "where b in (select a.building, count(a.id) from ApartmentEntity a " +
-                        "where lower(a.status) like lower('free') " +
-                        "group by a.building)",
-                BuildingEntity.class);
-        List<BuildingEntity> result = queryB.getResultList();*/
+        Long maxCount = query1.select(apartment.count())
+                .from(apartment)
+                .where(apartment.status.lower().eq("free"))
+                .groupBy(apartment.building)
+                .orderBy(apartment.count().desc())
+                .fetchFirst();
+        List<BuildingEntity> result = query.select(building).from(building).where(building.id.in(
+                JPAExpressions.select(apartment.building.id)
+                .from(apartment)
+                .where(apartment.status.lower().eq("free"))
+                .groupBy(apartment.building)
+                .having(apartment.count().eq(maxCount))
+        ))
+                .fetch();
         return result;
     }
 }
