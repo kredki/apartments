@@ -41,9 +41,9 @@ public class ClientRepositoryImpl implements ClientRepositoryCustom {
         TypedQuery<ClientEntity> query = entityManager.createQuery(
                 "select c from ClientEntity c " +
                         "join c.apartments a " +
-                        "where c member of a.owners " +
+                        "where c member of a.owners and lower(a.status) like lower('sold')" +
                         "group by c.id " +
-                        "having count(c.apartments) > 1", ClientEntity.class);
+                        "having count(a.id) > 1", ClientEntity.class);
         return query.getResultList();
     }
 }

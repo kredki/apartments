@@ -65,7 +65,7 @@ public class ApartmentGenerator {
                 .build();
     }
 
-    public ApartmentEntity getApartmentWithFloor0() {
+    public ApartmentEntity getSoldApartmentWithFloor0() {
         AddressInTable address= AddressInTable.builder()
                 .city("city")
                 .no("no")
@@ -84,7 +84,7 @@ public class ApartmentGenerator {
                 .build();
     }
 
-    public ApartmentEntity getApartmentWithFloor1() {
+    public ApartmentEntity getSoldApartmentWithFloor1() {
         AddressInTable address= AddressInTable.builder()
                 .city("city")
                 .no("no")

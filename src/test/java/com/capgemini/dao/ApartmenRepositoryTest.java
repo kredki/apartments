@@ -233,9 +233,9 @@ public class ApartmenRepositoryTest {
                 .build();
 
         Set<ApartmentEntity> apartments = new HashSet<>();
-        ApartmentEntity apartment1 = apartmentGenerator.getApartmentWithFloor0();
+        ApartmentEntity apartment1 = apartmentGenerator.getSoldApartmentWithFloor0();
         apartments.add(apartment1);
-        ApartmentEntity apartment2 = apartmentGenerator.getApartmentWithFloor1();
+        ApartmentEntity apartment2 = apartmentGenerator.getSoldApartmentWithFloor1();
         apartments.add(apartment2);
         apartment1.setMainOwner(mainOwner);
         apartment1.setOwners(Collections.singleton(mainOwner));
@@ -246,7 +246,7 @@ public class ApartmenRepositoryTest {
         apartment2.setOwners(owners);
         mainOwner.setApartments(apartments);
 
-        ApartmentEntity apartment3 = apartmentGenerator.getApartmentWithFloor1();
+        ApartmentEntity apartment3 = apartmentGenerator.getSoldApartmentWithFloor1();
         apartment3.setMainOwner(coowner);
         apartment3.setOwners(owners);
 
@@ -282,9 +282,9 @@ public class ApartmenRepositoryTest {
                 .build();
 
         Set<ApartmentEntity> apartments = new HashSet<>();
-        ApartmentEntity apartment1 = apartmentGenerator.getApartmentWithFloor0();
+        ApartmentEntity apartment1 = apartmentGenerator.getSoldApartmentWithFloor0();
         apartments.add(apartment1);
-        ApartmentEntity apartment2 = apartmentGenerator.getApartmentWithFloor1();
+        ApartmentEntity apartment2 = apartmentGenerator.getSoldApartmentWithFloor1();
         apartments.add(apartment2);
 
         building1.setApartments(apartments);

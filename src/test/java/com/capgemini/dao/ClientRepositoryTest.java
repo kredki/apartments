@@ -134,9 +134,9 @@ public class ClientRepositoryTest {
         ClientEntity coowner = clientGenerator.getClient();
 
         Set<ApartmentEntity> apartments = new HashSet<>();
-        ApartmentEntity apartment1 = apartmentGenerator.getApartmentWithFloor0();
+        ApartmentEntity apartment1 = apartmentGenerator.getSoldApartmentWithFloor0();
         apartments.add(apartment1);
-        ApartmentEntity apartment2 = apartmentGenerator.getApartmentWithFloor1();
+        ApartmentEntity apartment2 = apartmentGenerator.getSoldApartmentWithFloor1();
         apartments.add(apartment2);
         apartment1.setMainOwner(mainOwner);
         apartment1.setOwners(Collections.singleton(mainOwner));
@@ -154,14 +154,15 @@ public class ClientRepositoryTest {
         apartment2 = apartmentRepository.save(apartment2);
 
         //when
+        List<ApartmentEntity> list = apartmentRepository.findAll();
         List<ClientEntity> result = clientRepository.findClientsWithMoreThanOneApartment();
 
         //then
         assertThat(result).isNotNull().isNotEmpty();
-        assertEquals(3, result.size());
+        assertEquals(2, result.size());
         List<Long> ids = result.stream().map(x -> x.getId()).collect(Collectors.toList());
         assertTrue(ids.contains(mainOwner.getId()));
-        assertTrue(ids.contains(coowner.getId()));
+        assertFalse(ids.contains(coowner.getId()));
         assertTrue(ids.contains(client1.getId()));
     }
 
@@ -202,6 +203,7 @@ public class ClientRepositoryTest {
     @Test
     public void shouldUseOptimisticLocking() {
         //given
+        entityManager.flush();
         long versionBefore = client1.getVersion();
         long clientsQtyBefore = clientRepository.count();
         long client1Id = client1.getId();
