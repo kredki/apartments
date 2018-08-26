@@ -44,7 +44,7 @@ public class ApartmentMapper {
             ownersIds.add(owner.getId());
         }
 
-        return ApartmentTO.builder()
+        ApartmentTO apartmentTO = ApartmentTO.builder()
                 .address(address)
                 .area(apartment.getArea())
                 .balconyQty(apartment.getBalconyQty())
@@ -56,8 +56,12 @@ public class ApartmentMapper {
                 .roomQty(apartment.getRoomQty())
                 .status(apartment.getStatus())
                 .version(apartment.getVersion())
-                .mainOwner(apartment.getMainOwner().getId())
                 .build();
+        ClientEntity mainOwner = apartment.getMainOwner();
+        if(mainOwner != null) {
+            apartmentTO.setMainOwner(mainOwner.getId());
+        }
+        return apartmentTO;
     }
 
     /**
