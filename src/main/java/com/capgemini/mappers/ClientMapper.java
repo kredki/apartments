@@ -38,8 +38,14 @@ public class ClientMapper {
             apartmentsIds.add(apartment.getId());
         }
 
-        return ClientTO.builder().firstName(client.getFirstName()).id(client.getId()).lastName(client.getLastName())
-                .telephone(client.getTelephone()).address(address).version(client.getVersion()).apartments(apartmentsIds)
+        return ClientTO.builder()
+                .firstName(client.getFirstName())
+                .id(client.getId())
+                .lastName(client.getLastName())
+                .telephone(client.getTelephone())
+                .address(address)
+                .version(client.getVersion())
+                .apartments(apartmentsIds)
                 .build();
     }
 
@@ -59,8 +65,14 @@ public class ClientMapper {
             apartments.add(entityManager.getReference(ApartmentEntity.class, id));
         }
 
-        return ClientEntity.builder().firstName(client.getFirstName()).id(client.getId()).lastName(client.getLastName())
-                .telephone(client.getTelephone()).address(address).version(client.getVersion()).apartments(apartments)
+        return ClientEntity.builder()
+                .firstName(client.getFirstName())
+                .id(client.getId())
+                .lastName(client.getLastName())
+                .telephone(client.getTelephone())
+                .address(address)
+                .version(client.getVersion())
+                .apartments(apartments)
                 .build();
     }
 
@@ -83,7 +95,7 @@ public class ClientMapper {
     }
 
     /**
-     * Map set of entities to set of TOs.
+     * Map list of entities to list of TOs.
      * @param clients Objects to map.
      * @return Mapped objects.
      */
@@ -92,7 +104,7 @@ public class ClientMapper {
     }
 
     /**
-     * Map set of TOs to set of entities.
+     * Map list of TOs to list of entities.
      * @param clients Objects to map.
      * @return Mapped objects.
      */

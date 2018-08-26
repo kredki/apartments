@@ -44,9 +44,20 @@ public class ApartmentMapper {
             ownersIds.add(owner.getId());
         }
 
-        return ApartmentTO.builder().address(address).area(apartment.getArea()).balconyQty(apartment.getBalconyQty())
-                .building(buildingId).floor(apartment.getFloor()).id(apartment.getId()).owners(ownersIds).price(apartment.getPrice())
-                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).version(apartment.getVersion()).build();
+        return ApartmentTO.builder()
+                .address(address)
+                .area(apartment.getArea())
+                .balconyQty(apartment.getBalconyQty())
+                .building(buildingId)
+                .floor(apartment.getFloor())
+                .id(apartment.getId())
+                .owners(ownersIds)
+                .price(apartment.getPrice())
+                .roomQty(apartment.getRoomQty())
+                .status(apartment.getStatus())
+                .version(apartment.getVersion())
+                .mainOwner(apartment.getMainOwner().getId())
+                .build();
     }
 
     /**
@@ -60,15 +71,35 @@ public class ApartmentMapper {
         }
         AddressInTable address = AddressMapper.toInTable(apartment.getAddress());
 
-        BuildingEntity building = entityManager.getReference(BuildingEntity.class, apartment.getBuilding());
+        Long buildingId = apartment.getBuilding();
+        BuildingEntity building = null;
+        if (buildingId != null) {
+            building = entityManager.getReference(BuildingEntity.class, buildingId);
+        }
+        Long mainOwnerId = apartment.getMainOwner();
+        ClientEntity mainOwner = null;
+        if (mainOwnerId != null) {
+            mainOwner = entityManager.getReference(ClientEntity.class, mainOwnerId);
+        }
         Set<Long> ownersIds = apartment.getOwners();
         Set<ClientEntity> owners = new HashSet<>();
         for (Long id : ownersIds) {
             owners.add(entityManager.getReference(ClientEntity.class, id));
         }
-        return ApartmentEntity.builder().address(address).area(apartment.getArea()).balconyQty(apartment.getBalconyQty())
-                .building(building).floor(apartment.getFloor()).id(apartment.getId()).owners(owners).price(apartment.getPrice())
-                .roomQty(apartment.getRoomQty()).status(apartment.getStatus()).version(apartment.getVersion()).build();
+        return ApartmentEntity.builder()
+                .address(address)
+                .area(apartment.getArea())
+                .balconyQty(apartment.getBalconyQty())
+                .building(building)
+                .floor(apartment.getFloor())
+                .id(apartment.getId())
+                .owners(owners
+                ).price(apartment.getPrice())
+                .roomQty(apartment.getRoomQty())
+                .status(apartment.getStatus())
+                .version(apartment.getVersion())
+                .mainOwner(mainOwner)
+                .build();
     }
 
     /**
@@ -90,7 +121,7 @@ public class ApartmentMapper {
     }
 
     /**
-     * Map set of entities to set of TOs.
+     * Map list of entities list set of TOs.
      * @param apartments Objects to map.
      * @return Mapped objects.
      */
@@ -99,7 +130,7 @@ public class ApartmentMapper {
     }
 
     /**
-     * Map set of TOs to set of entities.
+     * Map list of TOs to list of entities.
      * @param apartments Objects to map.
      * @return Mapped objects.
      */

@@ -24,6 +24,7 @@ public class ApartmentTO {
     private BigDecimal price;
     private Set<Long> owners = new HashSet<>();
     private Long building;
+    private Long mainOwner;
 
     public Set<Long> getOwners() {
         return Objects.isNull(owners) ? new HashSet<>() : owners;

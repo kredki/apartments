@@ -1,7 +1,11 @@
 package com.capgemini.service.impl;
 
+import com.capgemini.dao.BuildingRepository;
+import com.capgemini.domain.BuildingEntity;
+import com.capgemini.mappers.BuildingMapper;
 import com.capgemini.service.BuildingService;
 import com.capgemini.types.BuildingTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +16,10 @@ import java.util.List;
  */
 @Service
 public class BuildingServiceImpl implements BuildingService {
+    @Autowired
+    BuildingMapper buildingMapper;
+    @Autowired
+    BuildingRepository buildingRepository;
     /**
      * Add new building.
      * @param buildingToAdd Building to add.
@@ -20,7 +28,11 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional
     public BuildingTO addNewBuilding(BuildingTO buildingToAdd) {
-        return null;
+        if(buildingToAdd == null) {
+            return null;
+        }
+        BuildingEntity buildingEntity = buildingMapper.toEntity(buildingToAdd);
+        return buildingMapper.toTO(buildingRepository.save(buildingEntity));
     }
 
     /**
@@ -31,7 +43,11 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional
     public BuildingTO updateBuilding(BuildingTO buildingToUpdate) {
-        return null;
+        if(buildingToUpdate == null) {
+            return null;
+        }
+        BuildingEntity buildingEntity = buildingMapper.toEntity(buildingToUpdate);
+        return buildingMapper.toTO(buildingRepository.save(buildingEntity));
     }
 
     /**
@@ -41,7 +57,7 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional
     public void removeBuilding(Long buildingId) {
-
+        buildingRepository.delete(buildingId);
     }
 
     /**
@@ -51,7 +67,7 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional(readOnly = true)
     public List<BuildingTO> findAll() {
-        return null;
+        return buildingMapper.map2TOs(buildingRepository.findAll());
     }
 
     /**
@@ -62,6 +78,6 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional(readOnly = true)
     public BuildingTO findById(Long id) {
-        return null;
+        return buildingMapper.toTO(buildingRepository.findOne(id));
     }
 }

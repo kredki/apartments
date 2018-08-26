@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,9 +38,14 @@ public class BuildingMapper {
             apartmentsIds.add(apartment.getId());
         }
 
-        return BuildingTO.builder().address(address).apartmentsQty(building.getApartmentsQty())
-                .description(building.getDescription()).floorQty(building.getFloorQty()).id(building.getId())
-                .isElevatorPresent(building.getIsElevatorPresent()).version(building.getVersion())
+        return BuildingTO.builder()
+                .address(address)
+                .apartmentsQty(building.getApartmentsQty())
+                .description(building.getDescription())
+                .floorQty(building.getFloorQty())
+                .id(building.getId())
+                .isElevatorPresent(building.getIsElevatorPresent())
+                .version(building.getVersion())
                 .apartments(apartmentsIds).build();
     }
 
@@ -59,9 +65,14 @@ public class BuildingMapper {
             apartments.add(entityManager.getReference(ApartmentEntity.class, id));
         }
 
-        return BuildingEntity.builder().address(address).apartmentsQty(building.getApartmentsQty())
-                .description(building.getDescription()).floorQty(building.getFloorQty()).id(building.getId())
-                .isElevatorPresent(building.getIsElevatorPresent()).version(building.getVersion()).apartments(apartments)
+        return BuildingEntity.builder()
+                .address(address)
+                .apartmentsQty(building.getApartmentsQty())
+                .description(building.getDescription())
+                .floorQty(building.getFloorQty())
+                .id(building.getId())
+                .isElevatorPresent(building.getIsElevatorPresent())
+                .version(building.getVersion()).apartments(apartments)
                 .build();
     }
 
@@ -81,5 +92,23 @@ public class BuildingMapper {
      */
     public Set<BuildingEntity> map2Entities (Set<BuildingTO> buildings) {
         return buildings.stream().map(this::toEntity).collect(Collectors.toSet());
+    }
+
+    /**
+     * Map list of entities to list of TOs.
+     * @param buildings Objects to map.
+     * @return Mapped objects.
+     */
+    public List<BuildingTO> map2TOs (List<BuildingEntity> buildings) {
+        return buildings.stream().map(this::toTO).collect(Collectors.toList());
+    }
+
+    /**
+     * Map list of TOs to list of entities.
+     * @param buildings Objects to map.
+     * @return Mapped objects.
+     */
+    public List<BuildingEntity> map2Entities (List<BuildingTO> buildings) {
+        return buildings.stream().map(this::toEntity).collect(Collectors.toList());
     }
 }
