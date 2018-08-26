@@ -272,7 +272,7 @@ public class ApartmentServiceImplTest {
                 .building(building.getId())
                 .floor(0)
                 .roomQty(1)
-                .price(new BigDecimal("120000"))
+                .price(new BigDecimal("12000012"))
                 .status("free")
                 .build();
 

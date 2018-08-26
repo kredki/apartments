@@ -55,4 +55,12 @@ public class BuildingEntity extends AbstractEntity implements Serializable {
             this.apartmentsQty += apartments.size();
         }
     }
+
+    public void addApartment(ApartmentEntity apartment) {
+        if(this.apartments == null) {
+            this.apartments = new HashSet<>();
+        }
+        apartments.add(apartment);
+        this.apartmentsQty++;
+    }
 }

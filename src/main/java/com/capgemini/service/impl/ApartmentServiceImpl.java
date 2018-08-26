@@ -1,8 +1,10 @@
 package com.capgemini.service.impl;
 
 import com.capgemini.dao.ApartmentRepository;
+import com.capgemini.dao.BuildingRepository;
 import com.capgemini.dao.ClientRepository;
 import com.capgemini.domain.ApartmentEntity;
+import com.capgemini.domain.BuildingEntity;
 import com.capgemini.domain.ClientEntity;
 import com.capgemini.mappers.ApartmentMapper;
 import com.capgemini.service.ApartmentService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 /**
@@ -21,13 +24,18 @@ public class ApartmentServiceImpl implements ApartmentService {
     private ApartmentMapper apartmentMapper;
     private ApartmentRepository apartmentRepository;
     private ClientRepository clientRepository;
+    private BuildingRepository buildingRepository;
+    private EntityManager entityManager;
 
     @Autowired
     public ApartmentServiceImpl(ApartmentMapper apartmentMapper, ApartmentRepository apartmentRepository,
-                                ClientRepository clientRepository) {
+                                ClientRepository clientRepository, BuildingRepository buildingRepository,
+                                EntityManager entityManager) {
         this.apartmentMapper = apartmentMapper;
         this.apartmentRepository = apartmentRepository;
         this.clientRepository = clientRepository;
+        this.buildingRepository = buildingRepository;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -42,8 +50,17 @@ public class ApartmentServiceImpl implements ApartmentService {
         if(apartmentToAdd == null || buildingId == null) {
             return null;
         }
-        apartmentToAdd.setBuilding(buildingId);
-        return apartmentMapper.toTO(apartmentRepository.save(apartmentMapper.toEntity(apartmentToAdd)));
+        BuildingEntity building = entityManager.getReference(BuildingEntity.class, buildingId);
+        if(building == null) {
+            return null;
+        }
+        ApartmentEntity apartmentEntity = apartmentMapper.toEntity(apartmentToAdd);
+        apartmentEntity = apartmentRepository.save(apartmentEntity);
+        building.addApartment(apartmentEntity);
+        building = buildingRepository.save(building);
+        apartmentEntity.setBuilding(building);
+
+        return apartmentMapper.toTO(apartmentEntity);
     }
 
     /**
