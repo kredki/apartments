@@ -18,12 +18,17 @@ import java.util.List;
  */
 @Service
 public class ApartmentServiceImpl implements ApartmentService {
-    @Autowired
     private ApartmentMapper apartmentMapper;
-    @Autowired
     private ApartmentRepository apartmentRepository;
-    @Autowired
     private ClientRepository clientRepository;
+
+    @Autowired
+    public ApartmentServiceImpl(ApartmentMapper apartmentMapper, ApartmentRepository apartmentRepository,
+                                ClientRepository clientRepository) {
+        this.apartmentMapper = apartmentMapper;
+        this.apartmentRepository = apartmentRepository;
+        this.clientRepository = clientRepository;
+    }
 
     /**
      * Add new apartment to building.
@@ -100,16 +105,20 @@ public class ApartmentServiceImpl implements ApartmentService {
     @Override
     @Transactional
     public boolean addReservation(Long clientId, Long apartmentId) {
+        if(clientId == null || apartmentId == null) {
+            return false;
+        }
         ApartmentEntity apartment = apartmentRepository.findOne(apartmentId);
         ClientEntity client = clientRepository.findOne(clientId);
         if(apartment == null || client == null) {
             return false;
         }
         int reservedApartmentsQty = apartmentRepository.findReservedApartmentsForClient(clientId).size();
-        if(reservedApartmentsQty <= 3 && apartment.getStatus().toLowerCase().equals("free") &&
+        if(reservedApartmentsQty < 3 && apartment.getStatus().toLowerCase().equals("free") &&
                 apartment.getMainOwner() == null) {
             apartment.setMainOwner(client);
             apartment.addOwner(client);
+            apartment.setStatus("reserved");
             client.addApartment(apartment);
             apartmentRepository.save(apartment);
             clientRepository.save(client);

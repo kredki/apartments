@@ -4,6 +4,8 @@ import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ClientEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+
 @Component
 public class ClientGenerator {
     public ClientEntity getClient() {
@@ -18,6 +20,7 @@ public class ClientGenerator {
                 .lastName("lastname")
                 .firstName("firstname")
                 .address(address)
+                .apartments(new HashSet<>())
                 .build();
     }
 }

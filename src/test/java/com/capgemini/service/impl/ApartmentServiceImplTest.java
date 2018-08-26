@@ -2,10 +2,14 @@ package com.capgemini.service.impl;
 
 import com.capgemini.dao.ApartmentRepository;
 import com.capgemini.dao.BuildingRepository;
+import com.capgemini.dao.ClientRepository;
 import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.domain.ClientEntity;
 import com.capgemini.testutils.ApartmentGenerator;
+import com.capgemini.testutils.BuildingGenerator;
+import com.capgemini.testutils.ClientGenerator;
 import com.capgemini.types.AddressTO;
 import com.capgemini.types.ApartmentTO;
 import org.junit.Before;
@@ -35,7 +39,13 @@ public class ApartmentServiceImplTest {
     @Autowired
     private ApartmentRepository apartmentRepository;
     @Autowired
+    private ClientRepository clientRepository;
+    @Autowired
     private ApartmentGenerator apartmentGenerator;
+    @Autowired
+    private ClientGenerator clientGenerator;
+    @Autowired
+    private BuildingGenerator buildingGenerator;
 
     private BuildingEntity building;
     private AddressTO addressTO;
@@ -249,6 +259,7 @@ public class ApartmentServiceImplTest {
     }
 
     @Test
+    @Transactional
     public void shouldAddApartment() {
         //given
         Set<ApartmentEntity>apartments = building.getApartments();
@@ -260,6 +271,7 @@ public class ApartmentServiceImplTest {
                 .balconyQty(1)
                 .building(building.getId())
                 .floor(0)
+                .roomQty(1)
                 .price(new BigDecimal("120000"))
                 .status("free")
                 .build();
@@ -290,5 +302,192 @@ public class ApartmentServiceImplTest {
                 assertEquals(apartmentToAdd.getStatus(), apartment.getStatus());
             }
         }
+    }
+
+    @Test
+    @Transactional
+    public void shouldAddReservation() {
+        //given
+        ClientEntity client = clientGenerator.getClient();
+        ApartmentEntity apartment = apartmentGenerator.getFreeApartment();
+        BuildingEntity building = buildingGenerator.getBuilding();
+        apartment.setBuilding(building);
+        client = clientRepository.save(client);
+        apartment = apartmentRepository.save(apartment);
+        Long apartmentQtyBefore = apartmentRepository.count();
+        long clientQtyBefore = clientRepository.count();
+        Long clientId = client.getId();
+        Long apartmentId = apartment.getId();
+
+        //when
+        boolean reservationAdded = apartmentService.addReservation(clientId, apartmentId);
+
+        //then
+        assertTrue(reservationAdded);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(clientRepository.count()).isEqualTo(clientQtyBefore);
+        ApartmentEntity apartmentAfter = apartmentRepository.findOne(apartmentId);
+        ClientEntity clientAfter = clientRepository.findOne(clientId);
+        assertThat(apartmentAfter.getStatus().toLowerCase()).isEqualTo("reserved");
+        ClientEntity mainOwner = apartmentAfter.getMainOwner();
+        assertThat(mainOwner).isNotNull();
+        assertThat(mainOwner.getId()).isEqualTo(clientId);
+        Set<ClientEntity> owners = apartmentAfter.getOwners();
+        assertThat(owners).isNotNull().isNotEmpty();
+        List<Long> ownersIds = owners.stream().map(x -> x.getId()).collect(Collectors.toList());
+        assertTrue(ownersIds.contains(clientId));
+        Set<ApartmentEntity> apartments = clientAfter.getApartments();
+        assertThat(apartments).isNotNull().isNotEmpty();
+        assertThat(apartments.size()).isEqualTo(1);
+        assertThat(apartments.iterator().next().getId()).isEqualTo(apartmentId);
+    }
+
+    @Test
+    @Transactional
+    public void shouldNotAddReservation() {
+        //given
+        ClientEntity client = clientGenerator.getClient();
+        ApartmentEntity apartmentToReserve = apartmentGenerator.getFreeApartment();
+        BuildingEntity building = buildingGenerator.getBuilding();
+        apartmentToReserve.setBuilding(building);
+        apartmentToReserve = apartmentRepository.save(apartmentToReserve);
+        ApartmentEntity apartment1 = apartmentGenerator.getReservedApartment();
+        ApartmentEntity apartment2 = apartmentGenerator.getReservedApartment();
+        ApartmentEntity apartment3 = apartmentGenerator.getReservedApartment();
+        apartment1.setBuilding(building);
+        apartment2.setBuilding(building);
+        apartment3.setBuilding(building);
+
+        client = clientRepository.save(client);
+        apartment1 = apartmentRepository.save(apartment1);
+        apartment2 = apartmentRepository.save(apartment2);
+        apartment3 = apartmentRepository.save(apartment3);
+
+        Set<ApartmentEntity> apartments = new HashSet<>();
+        apartments.add(apartment1);
+        apartments.add(apartment2);
+        apartments.add(apartment3);
+        Set<ClientEntity> owners = new HashSet<>();
+        owners.add(client);
+
+        apartment1.setMainOwner(client);
+        apartment2.setMainOwner(client);
+        apartment3.setMainOwner(client);
+        apartment1.setOwners(owners);
+        apartment2.setOwners(owners);
+        apartment3.setOwners(owners);
+        client.setApartments(apartments);
+
+        client = clientRepository.save(client);
+        apartment1 = apartmentRepository.save(apartment1);
+        apartment2 = apartmentRepository.save(apartment2);
+        apartment3 = apartmentRepository.save(apartment3);
+
+        Long apartmentQtyBefore = apartmentRepository.count();
+        long clientQtyBefore = clientRepository.count();
+        Long clientId = client.getId();
+        Long apartmentToReserveId = apartmentToReserve.getId();
+
+        //when
+        boolean reservationAdded = apartmentService.addReservation(clientId, apartmentToReserveId);
+
+        //then
+        assertFalse(reservationAdded);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(clientRepository.count()).isEqualTo(clientQtyBefore);
+        ApartmentEntity apartment1After = apartmentRepository.findOne(apartment1.getId());
+        ApartmentEntity apartment2After = apartmentRepository.findOne(apartment2.getId());
+        ApartmentEntity apartment3After = apartmentRepository.findOne(apartment3.getId());
+        ClientEntity clientAfter = clientRepository.findOne(clientId);
+
+        assertThat(apartment1After.getStatus().toLowerCase()).isEqualTo("reserved");
+        assertThat(apartment2After.getStatus().toLowerCase()).isEqualTo("reserved");
+        assertThat(apartment3After.getStatus().toLowerCase()).isEqualTo("reserved");
+
+        ClientEntity mainOwner1 = apartment1After.getMainOwner();
+        assertThat(mainOwner1).isNotNull();
+        Set<ClientEntity> apartment1AfterOwners = apartment1After.getOwners();
+        assertThat(apartment1AfterOwners).isNotNull().isNotEmpty();
+
+        ClientEntity mainOwner2 = apartment1After.getMainOwner();
+        assertThat(mainOwner2).isNotNull();
+        Set<ClientEntity> apartment2AfterOwners = apartment1After.getOwners();
+        assertThat(apartment2AfterOwners).isNotNull().isNotEmpty();
+
+        ClientEntity mainOwner3 = apartment1After.getMainOwner();
+        assertThat(mainOwner3).isNotNull();
+        Set<ClientEntity> apartment3AfterOwners = apartment1After.getOwners();
+        assertThat(apartment3AfterOwners).isNotNull().isNotEmpty();
+
+        Set<ApartmentEntity> clientAfterApartments = clientAfter.getApartments();
+        assertThat(clientAfterApartments).isNotNull();
+
+        List<Long> afterApartmentsIds = clientAfterApartments.stream().map(x -> x.getId()).collect(Collectors.toList());
+        assertTrue(afterApartmentsIds.contains(apartment1.getId()));
+        assertTrue(afterApartmentsIds.contains(apartment2.getId()));
+        assertTrue(afterApartmentsIds.contains(apartment3.getId()));
+        assertFalse(afterApartmentsIds.contains(apartmentToReserve.getId()));
+    }
+
+    @Test
+    @Transactional
+    public void shouldNotAddReservationWhenApartmentIdNull() {
+        //given
+        ClientEntity client = clientGenerator.getClient();
+        client = clientRepository.save(client);
+        Long apartmentQtyBefore = apartmentRepository.count();
+        long clientQtyBefore = clientRepository.count();
+        Long clientId = client.getId();
+
+        //when
+        boolean reservationAdded = apartmentService.addReservation(clientId, null);
+
+        //then
+        assertFalse(reservationAdded);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(clientRepository.count()).isEqualTo(clientQtyBefore);
+
+        ClientEntity clientAfter = clientRepository.findOne(clientId);
+        Set<ApartmentEntity> clientAfterApartments = clientAfter.getApartments();
+        assertThat(clientAfterApartments).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    public void shouldNotAddReservationWhenClientIdNull() {
+        //given
+        ApartmentEntity apartmentToReserve = apartmentGenerator.getFreeApartment();
+        BuildingEntity building = buildingGenerator.getBuilding();
+        apartmentToReserve.setBuilding(building);
+        apartmentToReserve = apartmentRepository.save(apartmentToReserve);
+        Long apartmentQtyBefore = apartmentRepository.count();
+        long clientQtyBefore = clientRepository.count();
+        Long apartmentToReserveId = apartmentToReserve.getId();
+
+        //when
+        boolean reservationAdded = apartmentService.addReservation(null, apartmentToReserveId);
+
+        //then
+        assertFalse(reservationAdded);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(clientRepository.count()).isEqualTo(clientQtyBefore);
+        ApartmentEntity apartmentAfter = apartmentRepository.findOne(apartmentToReserve.getId());
+        assertThat(apartmentAfter.getMainOwner()).isNull();;
+        assertThat(apartmentAfter.getOwners()).isEmpty();;
+    }
+
+    @Test
+    public void shouldNotAddReservationWhenClientIdAndApartmentIdNull() {
+        //given
+        Long apartmentQtyBefore = apartmentRepository.count();
+        long clientQtyBefore = clientRepository.count();
+
+        //when
+        boolean reservationAdded = apartmentService.addReservation(null, null);
+
+        //then
+        assertFalse(reservationAdded);
+        assertThat(apartmentRepository.count()).isEqualTo(apartmentQtyBefore);
+        assertThat(clientRepository.count()).isEqualTo(clientQtyBefore);
     }
 }
