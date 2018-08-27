@@ -6,6 +6,7 @@ import com.capgemini.dao.ClientRepository;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.domain.ClientEntity;
+import com.capgemini.exceptions.VersionIsNullException;
 import com.capgemini.mappers.ApartmentMapper;
 import com.capgemini.service.ApartmentService;
 import com.capgemini.types.ApartmentTO;
@@ -73,6 +74,9 @@ public class ApartmentServiceImpl implements ApartmentService {
     public ApartmentTO updateApartment(ApartmentTO apartmentToUpdate) {
         if(apartmentToUpdate == null) {
             return null;
+        }
+        if(apartmentToUpdate.getVersion() == null) {
+            throw new VersionIsNullException("Null version in ApartmentTO");
         }
         ApartmentEntity apartmentEntity = apartmentMapper.toEntity(apartmentToUpdate);
         ApartmentEntity savedApartment = apartmentRepository.save(apartmentEntity);

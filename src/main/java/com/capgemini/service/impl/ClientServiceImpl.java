@@ -1,6 +1,7 @@
 package com.capgemini.service.impl;
 
 import com.capgemini.dao.ClientRepository;
+import com.capgemini.exceptions.VersionIsNullException;
 import com.capgemini.mappers.ClientMapper;
 import com.capgemini.service.ClientService;
 import com.capgemini.types.ClientTO;
@@ -44,6 +45,9 @@ public class ClientServiceImpl implements ClientService {
     public ClientTO updateClient(ClientTO clientToUpdate) {
         if(clientToUpdate == null) {
             return null;
+        }
+        if(clientToUpdate.getVersion() == null) {
+            throw new VersionIsNullException("Null version in ClientTO");
         }
         return clientMapper.toTO(clientRepository.save(clientMapper.toEntity(clientToUpdate)));
     }

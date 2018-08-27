@@ -2,6 +2,7 @@ package com.capgemini.service.impl;
 
 import com.capgemini.dao.BuildingRepository;
 import com.capgemini.domain.BuildingEntity;
+import com.capgemini.exceptions.VersionIsNullException;
 import com.capgemini.mappers.BuildingMapper;
 import com.capgemini.service.BuildingService;
 import com.capgemini.types.BuildingTO;
@@ -45,6 +46,9 @@ public class BuildingServiceImpl implements BuildingService {
     public BuildingTO updateBuilding(BuildingTO buildingToUpdate) {
         if(buildingToUpdate == null) {
             return null;
+        }
+        if(buildingToUpdate.getVersion() == null) {
+            throw new VersionIsNullException("Null version in BuildingTO");
         }
         BuildingEntity buildingEntity = buildingMapper.toEntity(buildingToUpdate);
         return buildingMapper.toTO(buildingRepository.save(buildingEntity));
