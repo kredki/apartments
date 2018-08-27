@@ -7,6 +7,7 @@ import com.capgemini.domain.AddressInTable;
 import com.capgemini.domain.ApartmentEntity;
 import com.capgemini.domain.BuildingEntity;
 import com.capgemini.domain.ClientEntity;
+import com.capgemini.exceptions.VersionIsNullException;
 import com.capgemini.testutils.ApartmentGenerator;
 import com.capgemini.testutils.BuildingGenerator;
 import com.capgemini.testutils.ClientGenerator;
@@ -256,6 +257,38 @@ public class ApartmentServiceImplTest {
         assertThat(apartmentAfter.getPrice()).isEqualTo(apartmentToUpdate.getPrice());
         assertThat(apartmentAfter.getRoomQty()).isEqualTo(apartmentToUpdate.getRoomQty());
         assertThat(apartmentAfter.getStatus()).isEqualTo(apartmentToUpdate.getStatus());
+    }
+
+    @Test(expected = VersionIsNullException.class)
+    @Transactional
+    public void shouldNotUpdateApartment() {
+        //given
+        ApartmentEntity apartmentBefore = ApartmentEntity.builder()
+                .address(addressInTable)
+                .area(new BigDecimal("50"))
+                .balconyQty(1)
+                .building(building)
+                .floor(0)
+                .roomQty(2)
+                .price(new BigDecimal("120000"))
+                .status("free")
+                .build();
+        apartmentBefore = apartmentRepository.save(apartmentBefore);
+
+        ApartmentTO apartmentToUpdate = ApartmentTO.builder()
+                .id(apartmentBefore.getId())
+                .address(addressTO)
+                .area(new BigDecimal("70"))
+                .balconyQty(12)
+                .building(building.getId())
+                .floor(10)
+                .roomQty(1)
+                .price(new BigDecimal("1200000"))
+                .status("sold")
+                .build();
+
+        //when
+        ApartmentTO result = apartmentService.updateApartment(apartmentToUpdate);
     }
 
     @Test
